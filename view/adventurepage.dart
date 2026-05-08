@@ -151,15 +151,15 @@ class _AdventurePageState extends State<AdventurePage> {
   Widget _buildPlayButton(int lv) {
     return ElevatedButton(
       onPressed: () async {
-        // Navigasi ke game dan tunggu hasil (jika menang)
         await Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const GameView(
-                    bgImagePath: 'assets/beachmap.jpg',
+              builder: (context) => GameView(
+                    bgImagePath:
+                        'assets/beachmap.jpeg', // Bisa diganti sesuai map-nya
+                    level: lv, // INI PENTING! Kirim level ke dalam game
                   )),
         );
-        // Refresh halaman saat kembali dari game untuk update gembok
         setState(() {});
       },
       style: ElevatedButton.styleFrom(

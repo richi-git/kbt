@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:praktikum_1/view/adventurepage.dart';
 // Pastikan import GameView sesuai dengan lokasi file Anda
 import 'package:praktikum_1/view/game_view.dart';
 
@@ -193,10 +194,11 @@ class HomePage extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
+                      // Alur: Home -> Adventure (Pilih Map)
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const GameView()),
+                            builder: (context) => const AdventurePage()),
                       );
                     },
                     style: ElevatedButton.styleFrom(

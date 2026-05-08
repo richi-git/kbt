@@ -5,10 +5,16 @@ import 'package:praktikum_1/widget/node_widget.dart';
 import 'package:praktikum_1/config/game_config.dart';
 import 'package:praktikum_1/widget/result_preview.dart';
 import 'package:praktikum_1/widget/score_bar_widget.dart';
+import 'package:praktikum_1/widget/target_column_widget.dart';
 import 'package:praktikum_1/service/qc_service.dart';
 
 class GameView extends StatefulWidget {
-  const GameView({super.key});
+  final String bgImagePath;
+
+  const GameView({
+    super.key,
+    this.bgImagePath = 'assets/beachmap.jpeg',
+  });
 
   @override
   State<GameView> createState() => _GameViewState();
@@ -24,10 +30,8 @@ class _GameViewState extends State<GameView> {
 
   List<int> activeDeliveryRoute = [];
 
-  // KPI Score Dashboard State
   int userScore = 10;
   int aiScore = 100;
-
   String currentCalculationResult = "";
 
   @override
@@ -54,7 +58,6 @@ class _GameViewState extends State<GameView> {
     );
   }
 
-  // Helper logistik untuk melihat semua order yang ada
   List<String> _getAllActiveOrders() {
     return [...easyTargets, ...mediumTargets, ...hardTargets];
   }
@@ -66,21 +69,45 @@ class _GameViewState extends State<GameView> {
     hardTargets.clear();
 
     for (int i = 0; i < batchSize; i++) {
-      easyTargets.add(_pullUniqueFromInventory(3, _getAllActiveOrders()));
+      easyTargets.add(_pullUniqueFromInventory(
+          possibleLengths: [3], // 1 Langkah (Angka-Operator-Angka)
+          minResult: 2,
+          maxResult: 20,
+          allowedOperators: ['+', '-'],
+          excludeList: _getAllActiveOrders()));
     }
     for (int i = 0; i < batchSize; i++) {
-      mediumTargets.add(_pullUniqueFromInventory(5, _getAllActiveOrders()));
+      mediumTargets.add(_pullUniqueFromInventory(
+          possibleLengths: [3, 5], // 1 - 2 Langkah
+          minResult: 10,
+          maxResult: 50,
+          allowedOperators: ['+', '-', 'x'],
+          excludeList: _getAllActiveOrders()));
     }
     for (int i = 0; i < batchSize; i++) {
-      hardTargets.add(_pullUniqueFromInventory(7, _getAllActiveOrders()));
+      hardTargets.add(_pullUniqueFromInventory(
+          possibleLengths: [5, 7], // 2 - 3 Langkah
+          minResult: 20,
+          maxResult: 100,
+          allowedOperators: ['+', '-', 'x', '÷'],
+          excludeList: _getAllActiveOrders()));
     }
   }
 
-  // Ekstraksi data dengan filter Unique SKU
-  String _pullUniqueFromInventory(int targetLength, List<String> excludeList) {
+  // Parameter yang lebih fleksibel menyesuaikan tabel level
+  String _pullUniqueFromInventory({
+    required List<int> possibleLengths,
+    required int minResult,
+    required int maxResult,
+    required List<String> allowedOperators,
+    required List<String> excludeList,
+  }) {
     int attempts = 0;
-    while (attempts < 50) {
+    while (attempts < 100) {
+      // Limit percobaan untuk menemukan rute di grid
       attempts++;
+      int targetLength =
+          possibleLengths[_random.nextInt(possibleLengths.length)];
       int startIndex = _random.nextInt(gridNodes.length);
 
       if (gridNodes[startIndex].type != NodeType.number) continue;
@@ -97,6 +124,12 @@ class _GameViewState extends State<GameView> {
             (i % 2 == 0) ? NodeType.number : NodeType.operator;
         neighbors.retainWhere((n) => gridNodes[n].type == expectedType);
 
+        // Hanya mengizinkan operator sesuai tingkat kesulitan
+        if (expectedType == NodeType.operator) {
+          neighbors.retainWhere(
+              (n) => allowedOperators.contains(gridNodes[n].value));
+        }
+
         if (neighbors.isEmpty) {
           isRouteFailed = true;
           break;
@@ -108,29 +141,24 @@ class _GameViewState extends State<GameView> {
 
       if (!isRouteFailed && QCService.validateRoute(testRoute, gridNodes)) {
         int result = QCService.calculateOutput(testRoute, gridNodes);
-        // Validasi tambahan: Hasil harus positif dan belum ada di daftar order
-        if (result > 0 && !excludeList.contains(result.toString())) {
+        if (result >= minResult &&
+            result <= maxResult &&
+            !excludeList.contains(result.toString())) {
           return result.toString();
         }
       }
     }
 
-    // Safety stock fallback dengan validasi unik
+    // Fallback sistem jika susunan grid sedang tidak memungkinkan membuat target tersebut
     int fallbackAttempts = 0;
     while (fallbackAttempts < 50) {
       fallbackAttempts++;
-      String fallback;
-      if (targetLength == 3)
-        fallback = (_random.nextInt(20) + 1).toString();
-      else if (targetLength == 5)
-        fallback = (_random.nextInt(30) + 21).toString();
-      else
-        fallback = (_random.nextInt(50) + 51).toString();
-
-      if (!excludeList.contains(fallback)) return fallback;
+      int fallback = _random.nextInt(maxResult - minResult + 1) + minResult;
+      if (!excludeList.contains(fallback.toString()))
+        return fallback.toString();
     }
 
-    return (_random.nextInt(900) + 100).toString(); // Extreme fallback
+    return (_random.nextInt(maxResult - minResult + 1) + minResult).toString();
   }
 
   List<int> _getAdjacentNodes(int index) {
@@ -229,29 +257,49 @@ class _GameViewState extends State<GameView> {
       if (easyIndex != -1) {
         isOrderFulfilled = true;
         userScore += 3;
-        easyTargets[easyIndex] =
-            _pullUniqueFromInventory(3, _getAllActiveOrders());
+        easyTargets[easyIndex] = _pullUniqueFromInventory(
+            possibleLengths: [3],
+            minResult: 2,
+            maxResult: 20,
+            allowedOperators: ['+', '-'],
+            excludeList: _getAllActiveOrders());
       } else {
         int mediumIndex = mediumTargets.indexOf(outputStr);
         if (mediumIndex != -1) {
           isOrderFulfilled = true;
           userScore += 5;
-          mediumTargets[mediumIndex] =
-              _pullUniqueFromInventory(5, _getAllActiveOrders());
+          mediumTargets[mediumIndex] = _pullUniqueFromInventory(
+              possibleLengths: [3, 5],
+              minResult: 10,
+              maxResult: 50,
+              allowedOperators: ['+', '-', 'x'],
+              excludeList: _getAllActiveOrders());
         } else {
           int hardIndex = hardTargets.indexOf(outputStr);
           if (hardIndex != -1) {
             isOrderFulfilled = true;
             userScore += 9;
-            hardTargets[hardIndex] =
-                _pullUniqueFromInventory(7, _getAllActiveOrders());
+            hardTargets[hardIndex] = _pullUniqueFromInventory(
+                possibleLengths: [5, 7],
+                minResult: 20,
+                maxResult: 100,
+                allowedOperators: ['+', '-', 'x', '÷'],
+                excludeList: _getAllActiveOrders());
           }
         }
       }
 
       if (isOrderFulfilled) {
         QCService.restockInventory(activeDeliveryRoute, gridNodes);
-        if (aiScore > 10) aiScore -= 2;
+
+        // Logika Menang
+        if (userScore >= 50) {
+          if (GameConfig.latestUnlockedLevel < 4) {
+            GameConfig.latestUnlockedLevel++;
+          }
+          _showWinDialog();
+          return;
+        }
       }
     }
 
@@ -264,103 +312,239 @@ class _GameViewState extends State<GameView> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              ScoreBarWidget(userScore: userScore, aiScore: aiScore),
-              const SizedBox(height: 24),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 7,
-                      child: Center(
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: LayoutBuilder(builder: (context, constraints) {
-                            return GestureDetector(
-                              onPanStart: (details) => _planRoute(
-                                  details.localPosition, constraints),
-                              onPanUpdate: (details) => _planRoute(
-                                  details.localPosition, constraints),
-                              onPanEnd: (details) => _executeDelivery(),
-                              child: GridView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: GameConfig.crossAxisCount,
-                                  childAspectRatio: 1.0,
-                                ),
-                                itemCount: gridNodes.length,
-                                itemBuilder: (context, index) {
-                                  return NodeWidget(node: gridNodes[index]);
-                                },
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ResultPreviewWidget(result: currentCalculationResult),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 3,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildDemandColumn('+3', easyTargets),
-                          _buildDemandColumn('+5', mediumTargets),
-                          _buildDemandColumn('+9', hardTargets),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+  void _showPauseMenu() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text(
+            'Game Paused',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
           ),
+          content: const Text(
+            'Apa yang ingin kamu lakukan?',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[500],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text(
+                'Resume',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text(
+                'Home',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showWinDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          "LEVEL COMPLETE!",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 24, color: Colors.green),
         ),
+        content: const Text(
+          "Selamat! Level berikutnya telah terbuka.",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 18),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: const Text(
+              "BACK TO MAP",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
+          )
+        ],
       ),
     );
   }
 
-  Widget _buildDemandColumn(String header, List<String> targets) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4.0),
-        padding: const EdgeInsets.only(bottom: 8.0),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
         decoration: BoxDecoration(
-          color: Colors.grey[400],
-          borderRadius: BorderRadius.circular(8.0),
+          image: DecorationImage(
+            image: AssetImage(widget.bgImagePath),
+            fit: BoxFit.cover,
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                header,
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.pause_circle_filled_rounded),
+                      color: Colors.white,
+                      iconSize: 48,
+                      onPressed: _showPauseMenu,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            ...targets.map((t) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text(
-                    t,
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
+              Expanded(
+                child: Container(
+                  margin:
+                      const EdgeInsets.only(left: 16, right: 16, bottom: 24),
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.blue[300]!, width: 4),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 5))
+                    ],
                   ),
-                )),
-          ],
+                  child: Column(
+                    children: [
+                      ScoreBarWidget(userScore: userScore, aiScore: aiScore),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              flex: 5,
+                              child: Center(
+                                child: AspectRatio(
+                                  aspectRatio: 1,
+                                  child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                    return GestureDetector(
+                                      onPanStart: (details) => _planRoute(
+                                          details.localPosition, constraints),
+                                      onPanUpdate: (details) => _planRoute(
+                                          details.localPosition, constraints),
+                                      onPanEnd: (details) => _executeDelivery(),
+                                      child: GridView.builder(
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount:
+                                              GameConfig.crossAxisCount,
+                                          childAspectRatio: 1.0,
+                                        ),
+                                        itemCount: gridNodes.length,
+                                        itemBuilder: (context, index) {
+                                          return NodeWidget(
+                                              node: gridNodes[index]);
+                                        },
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Center(
+                                child: ResultPreviewWidget(
+                                    result: currentCalculationResult),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 5,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  TargetColumnWidget(
+                                      header: '+3',
+                                      targets: easyTargets,
+                                      headerColor: Colors.green[600]!),
+                                  TargetColumnWidget(
+                                      header: '+5',
+                                      targets: mediumTargets,
+                                      headerColor: Colors.purple[600]!),
+                                  TargetColumnWidget(
+                                      header: '+9',
+                                      targets: hardTargets,
+                                      headerColor: Colors.orange[600]!),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

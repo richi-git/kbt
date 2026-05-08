@@ -9,22 +9,30 @@ class NodeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // --- PERUBAHAN: Meningkatkan margin antar box ---
-      margin: const EdgeInsets.all(6.0),
+      margin: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
-        color: node.isSelected ? Colors.blueGrey[400] : Colors.grey[400],
+        color: node.isSelected ? Colors.blue[100] : Colors.white,
         borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(
+            color: node.isSelected ? Colors.blue : Colors.blue[100]!, width: 2),
+        boxShadow: [
+          if (!node.isSelected)
+            BoxShadow(
+              color: Colors.blueGrey.withOpacity(0.2),
+              blurRadius: 2,
+              offset: const Offset(1, 2),
+            )
+        ],
       ),
       child: Center(
         child: Text(
           node.value,
           style: TextStyle(
-            // --- PERUBAHAN: Meningkatkan ukuran text ---
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
+            fontSize: 26,
+            fontWeight: FontWeight.w900,
             color: node.type == NodeType.empty
                 ? Colors.transparent
-                : Colors.black87,
+                : const Color(0xFF0D47A1), // Biru gelap
           ),
         ),
       ),

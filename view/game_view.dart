@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async'; // Tambahkan ini untuk Timer
 import 'package:flutter/material.dart';
 import 'package:praktikum_1/model/node_model.dart';
 import 'package:praktikum_1/widget/node_widget.dart';
@@ -10,10 +11,12 @@ import 'package:praktikum_1/service/qc_service.dart';
 
 class GameView extends StatefulWidget {
   final String bgImagePath;
+  final int level; // Tambahkan penanda level saat ini
 
   const GameView({
     super.key,
     this.bgImagePath = 'assets/beachmap.jpeg',
+    this.level = 1, // Default ke level 1
   });
 
   @override
@@ -34,12 +37,67 @@ class _GameViewState extends State<GameView> {
   int aiScore = 100;
   String currentCalculationResult = "";
 
+  // Variabel untuk Timer
+  Timer? _timer;
+  late int remainingSeconds;
+
   @override
   void initState() {
     super.initState();
     _initRandomInventory();
     _generateDemandForecast();
+    _initTimerConfig(); // Inisialisasi waktu
   }
+
+  // --- LOGIKA TIMER ---
+  void _initTimerConfig() {
+    // Set durasi berdasarkan level (dalam detik)
+    switch (widget.level) {
+      case 4:
+        remainingSeconds = 3 * 60;
+        break; // 3 Menit
+      case 3:
+        remainingSeconds = 5 * 60;
+        break; // 5 Menit
+      case 2:
+        remainingSeconds = 8 * 60;
+        break; // 8 Menit
+      case 1:
+      default:
+        remainingSeconds = 10 * 60;
+        break; // 10 Menit
+    }
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (remainingSeconds > 0) {
+        setState(() {
+          remainingSeconds--;
+        });
+      } else {
+        // Waktu Habis
+        _timer?.cancel();
+        _showLoseDialog();
+      }
+    });
+  }
+
+  // Format ke String MM:SS untuk UI
+  String get formattedTime {
+    int minutes = remainingSeconds ~/ 60;
+    int seconds = remainingSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Pastikan timer dimatikan saat keluar halaman
+    super.dispose();
+  }
+
+  // --- LOGIKA PERMAINAN (TETAP SAMA) ---
 
   void _initRandomInventory() {
     gridNodes = List.generate(
@@ -70,7 +128,7 @@ class _GameViewState extends State<GameView> {
 
     for (int i = 0; i < batchSize; i++) {
       easyTargets.add(_pullUniqueFromInventory(
-          possibleLengths: [3], // 1 Langkah (Angka-Operator-Angka)
+          possibleLengths: [3],
           minResult: 2,
           maxResult: 20,
           allowedOperators: ['+', '-'],
@@ -78,7 +136,7 @@ class _GameViewState extends State<GameView> {
     }
     for (int i = 0; i < batchSize; i++) {
       mediumTargets.add(_pullUniqueFromInventory(
-          possibleLengths: [3, 5], // 1 - 2 Langkah
+          possibleLengths: [3, 5],
           minResult: 10,
           maxResult: 50,
           allowedOperators: ['+', '-', 'x'],
@@ -86,7 +144,7 @@ class _GameViewState extends State<GameView> {
     }
     for (int i = 0; i < batchSize; i++) {
       hardTargets.add(_pullUniqueFromInventory(
-          possibleLengths: [5, 7], // 2 - 3 Langkah
+          possibleLengths: [5, 7],
           minResult: 20,
           maxResult: 100,
           allowedOperators: ['+', '-', 'x', '÷'],
@@ -94,7 +152,6 @@ class _GameViewState extends State<GameView> {
     }
   }
 
-  // Parameter yang lebih fleksibel menyesuaikan tabel level
   String _pullUniqueFromInventory({
     required List<int> possibleLengths,
     required int minResult,
@@ -104,7 +161,6 @@ class _GameViewState extends State<GameView> {
   }) {
     int attempts = 0;
     while (attempts < 100) {
-      // Limit percobaan untuk menemukan rute di grid
       attempts++;
       int targetLength =
           possibleLengths[_random.nextInt(possibleLengths.length)];
@@ -124,7 +180,6 @@ class _GameViewState extends State<GameView> {
             (i % 2 == 0) ? NodeType.number : NodeType.operator;
         neighbors.retainWhere((n) => gridNodes[n].type == expectedType);
 
-        // Hanya mengizinkan operator sesuai tingkat kesulitan
         if (expectedType == NodeType.operator) {
           neighbors.retainWhere(
               (n) => allowedOperators.contains(gridNodes[n].value));
@@ -149,7 +204,6 @@ class _GameViewState extends State<GameView> {
       }
     }
 
-    // Fallback sistem jika susunan grid sedang tidak memungkinkan membuat target tersebut
     int fallbackAttempts = 0;
     while (fallbackAttempts < 50) {
       fallbackAttempts++;
@@ -195,9 +249,7 @@ class _GameViewState extends State<GameView> {
       if (relativeX < 0.2 ||
           relativeX > 0.8 ||
           relativeY < 0.2 ||
-          relativeY > 0.8) {
-        return;
-      }
+          relativeY > 0.8) return;
 
       int index = row * GameConfig.crossAxisCount + col;
 
@@ -207,7 +259,6 @@ class _GameViewState extends State<GameView> {
           setState(() {
             int removedIndex = activeDeliveryRoute.removeLast();
             gridNodes[removedIndex].isSelected = false;
-
             if (activeDeliveryRoute.isNotEmpty &&
                 QCService.validateRoute(activeDeliveryRoute, gridNodes)) {
               currentCalculationResult =
@@ -225,7 +276,6 @@ class _GameViewState extends State<GameView> {
         int lastIndex = activeDeliveryRoute.last;
         int lastRow = lastIndex ~/ GameConfig.crossAxisCount;
         int lastCol = lastIndex % GameConfig.crossAxisCount;
-
         if ((row - lastRow).abs() > 1 || (col - lastCol).abs() > 1) return;
       }
 
@@ -294,6 +344,7 @@ class _GameViewState extends State<GameView> {
 
         // Logika Menang
         if (userScore >= 50) {
+          _timer?.cancel(); // Hentikan timer saat menang
           if (GameConfig.latestUnlockedLevel < 4) {
             GameConfig.latestUnlockedLevel++;
           }
@@ -312,7 +363,9 @@ class _GameViewState extends State<GameView> {
     });
   }
 
+  // --- POP-UP MENU ---
   void _showPauseMenu() {
+    _timer?.cancel(); // Pause Timer
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -320,37 +373,30 @@ class _GameViewState extends State<GameView> {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text(
-            'Game Paused',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-          ),
-          content: const Text(
-            'Apa yang ingin kamu lakukan?',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18),
-          ),
+          title: const Text('Game Paused',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+          content: const Text('Apa yang ingin kamu lakukan?',
+              textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                _startTimer(); // Resume Timer
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[500],
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                    borderRadius: BorderRadius.circular(12)),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: const Text(
-                'Resume',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
+              child: const Text('Resume',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16)),
             ),
             const SizedBox(width: 8),
             ElevatedButton(
@@ -360,18 +406,15 @@ class _GameViewState extends State<GameView> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.redAccent,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                    borderRadius: BorderRadius.circular(12)),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: const Text(
-                'Home',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
+              child: const Text('Home',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16)),
             ),
           ],
         );
@@ -385,17 +428,14 @@ class _GameViewState extends State<GameView> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          "LEVEL COMPLETE!",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 24, color: Colors.green),
-        ),
-        content: const Text(
-          "Selamat! Level berikutnya telah terbuka.",
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
-        ),
+        title: const Text("LEVEL COMPLETE!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: Colors.green)),
+        content: const Text("Selamat! Level berikutnya telah terbuka.",
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           ElevatedButton(
@@ -406,17 +446,52 @@ class _GameViewState extends State<GameView> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blueAccent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: const Text(
-              "BACK TO MAP",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
+            child: const Text("BACK TO MAP",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16)),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showLoseDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("WAKTU HABIS!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 24, color: Colors.red)),
+        content: const Text(
+            "Sayang sekali, waktu kamu sudah habis. Coba lagi ya!",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18)),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
+            child: const Text("KEMBALI KE MAP",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16)),
           )
         ],
       ),
@@ -436,6 +511,7 @@ class _GameViewState extends State<GameView> {
         child: SafeArea(
           child: Column(
             children: [
+              // --- HEADER DENGAN TOMBOL PAUSE & TIMER ---
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -448,9 +524,40 @@ class _GameViewState extends State<GameView> {
                       iconSize: 48,
                       onPressed: _showPauseMenu,
                     ),
+
+                    // WIDGET TIMER
+                    Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.timer_rounded,
+                                color: remainingSeconds <= 60
+                                    ? Colors.redAccent
+                                    : Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              formattedTime,
+                              style: TextStyle(
+                                  color: remainingSeconds <= 60
+                                      ? Colors.redAccent
+                                      : Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        )),
+                    const SizedBox(
+                        width: 48), // Placeholder penyeimbang posisi tengah
                   ],
                 ),
               ),
+
               Expanded(
                 child: Container(
                   margin:

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:praktikum_1/view/homepage.dart';
-import 'package:praktikum_1/view/characterpage.dart';
-import 'package:praktikum_1/view/storepage.dart'; // Import Store Page
+import 'package:praktikum_1/view/inventorypage.dart'; // UBAH IMPORT INI
+import 'package:praktikum_1/view/storepage.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -13,10 +13,9 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  // Daftar halaman tujuan (Home, Character, Store)
   final List<Widget> _pages = const [
     HomePage(),
-    CharacterPage(),
+    InventoryPage(), // UBAH INI
     StorePage(),
   ];
 
@@ -32,10 +31,9 @@ class _MainNavigationState extends State<MainNavigation> {
           borderRadius: BorderRadius.circular(30.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 5))
           ],
         ),
         child: ClipRRect(
@@ -56,17 +54,12 @@ class _MainNavigationState extends State<MainNavigation> {
             type: BottomNavigationBarType.fixed,
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded, size: 28),
-                label: 'HOME',
-              ),
+                  icon: Icon(Icons.home_rounded, size: 28), label: 'HOME'),
               BottomNavigationBarItem(
-                icon: Icon(Icons.face_rounded, size: 28),
-                label: 'CHARACTER',
-              ),
+                  icon: Icon(Icons.backpack_rounded, size: 28),
+                  label: 'INVENTORY'), // UBAH ICON DAN LABEL
               BottomNavigationBarItem(
-                icon: Icon(Icons.store_rounded, size: 28),
-                label: 'STORE',
-              ),
+                  icon: Icon(Icons.store_rounded, size: 28), label: 'STORE'),
             ],
           ),
         ),

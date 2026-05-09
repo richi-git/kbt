@@ -8,7 +8,8 @@ import 'package:praktikum_1/widget/result_preview.dart';
 import 'package:praktikum_1/widget/score_bar_widget.dart';
 import 'package:praktikum_1/widget/target_column_widget.dart';
 import 'package:praktikum_1/service/qc_service.dart';
-import 'package:praktikum_1/widget/game_dialog_helper.dart'; // Import Dialog Helper
+import 'package:praktikum_1/widget/game_dialog_helper.dart';
+import 'package:praktikum_1/widget/floating_score_widget.dart'; // IMPORT WIDGET ANIMASI DI SINI
 
 class GameView extends StatefulWidget {
   final String bgImagePath;
@@ -112,8 +113,8 @@ class _GameViewState extends State<GameView> {
     if (GameConfig.selectedCharacter == "BUBU") {
       _idleTimer = Timer(const Duration(seconds: 5), () {
         if (mounted) {
-          List<int> route = QCService.findHintRoute(
-              gridNodes, _getAllActiveOrders()); // Panggil QCService
+          List<int> route =
+              QCService.findHintRoute(gridNodes, _getAllActiveOrders());
           if (route.isNotEmpty)
             setState(() {
               hintedRoute = route;
@@ -189,6 +190,24 @@ class _GameViewState extends State<GameView> {
           excludeList: _getAllActiveOrders()));
   }
 
+  void _showFloatingAnimation(String text, Color color) {
+    if (!mounted) return;
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+
+    entry = OverlayEntry(
+      builder: (context) => FloatingScoreWidget(
+        text: text,
+        color: color,
+        onComplete: () {
+          entry.remove();
+        },
+      ),
+    );
+
+    overlay.insert(entry);
+  }
+
   void _planRoute(Offset position, BoxConstraints constraints) {
     _resetIdleTimer();
     double cellW = constraints.maxWidth / GameConfig.crossAxisCount;
@@ -253,6 +272,7 @@ class _GameViewState extends State<GameView> {
       if (eIdx != -1) {
         isOrderFulfilled = true;
         earned = 3;
+        _showFloatingAnimation("+$earned", Colors.green[600]!);
         easyTargets[eIdx] = QCService.pullUniqueFromInventory(
             gridNodes: gridNodes,
             possibleLengths: [3],
@@ -263,6 +283,7 @@ class _GameViewState extends State<GameView> {
       } else if (mIdx != -1) {
         isOrderFulfilled = true;
         earned = 5;
+        _showFloatingAnimation("+$earned", Colors.purple[600]!);
         mediumTargets[mIdx] = QCService.pullUniqueFromInventory(
             gridNodes: gridNodes,
             possibleLengths: [3, 5],
@@ -273,6 +294,7 @@ class _GameViewState extends State<GameView> {
       } else if (hIdx != -1) {
         isOrderFulfilled = true;
         earned = GameConfig.selectedCharacter == "GIRL" ? 10 : 9;
+        _showFloatingAnimation("+$earned", Colors.orange[600]!);
         hardTargets[hIdx] = QCService.pullUniqueFromInventory(
             gridNodes: gridNodes,
             possibleLengths: [5, 7],
@@ -297,7 +319,6 @@ class _GameViewState extends State<GameView> {
             GameDialogHelper.showWinDialog(context);
           }
         });
-        // FIX BUG: `return;` dihapus di sini agar kode di bawah tetap dipanggil untuk mereset blue box!
       }
     }
 
@@ -305,7 +326,7 @@ class _GameViewState extends State<GameView> {
       for (int index in activeDeliveryRoute)
         gridNodes[index].isSelected = false;
       activeDeliveryRoute.clear();
-      currentCalculationResult = ""; // Kotak biru akan otomatis bersih di sini!
+      currentCalculationResult = "";
     });
   }
 

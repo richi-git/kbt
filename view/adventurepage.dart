@@ -179,7 +179,7 @@ class _AdventurePageState extends State<AdventurePage> {
           MaterialPageRoute(
               builder: (context) => GameView(
                     bgImagePath:
-                        'assets/beachmap.jpeg', // Bisa diganti sesuai map
+                        'assets/beachmap.jpg', // Bisa diganti sesuai map
                     level: lv,
                   )),
         );

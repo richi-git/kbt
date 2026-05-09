@@ -1,3 +1,7 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+
 class GameConfig {
   // Ukuran grid, misal 8 kolom dan 8 baris
   static const int crossAxisCount = 8;
@@ -12,6 +16,7 @@ class GameConfig {
 
 // --- TAMBAHAN: Menyimpan Karakter yang Dipilih ---
   static String selectedCharacter = "BUBU"; // Default awal
+  static Color selectedBorderColor = Colors.blue[300]!; // Default warna border
 
   // Rentang angka yang akan muncul (misal 1 sampai 9)
   static const int minNumber = 1;

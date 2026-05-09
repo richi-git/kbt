@@ -8,15 +8,19 @@ import 'package:praktikum_1/widget/result_preview.dart';
 import 'package:praktikum_1/widget/score_bar_widget.dart';
 import 'package:praktikum_1/widget/target_column_widget.dart';
 import 'package:praktikum_1/service/qc_service.dart';
+import 'package:praktikum_1/service/audio_service.dart';
 import 'package:praktikum_1/widget/game_dialog_helper.dart';
-import 'package:praktikum_1/widget/floating_score_widget.dart'; // IMPORT WIDGET ANIMASI DI SINI
+import 'package:praktikum_1/widget/floating_score_widget.dart';
 
 class GameView extends StatefulWidget {
   final String bgImagePath;
   final int level;
 
-  const GameView(
-      {super.key, this.bgImagePath = 'assets/beachmap.jpg', this.level = 1});
+  const GameView({
+    super.key,
+    this.bgImagePath = 'assets/beachmap.jpg',
+    this.level = 1,
+  });
 
   @override
   State<GameView> createState() => _GameViewState();
@@ -31,6 +35,7 @@ class _GameViewState extends State<GameView> {
   List<String> hardTargets = [];
   List<int> activeDeliveryRoute = [];
 
+  // LOGIKA TARIK TAMBANG: Total 50 poin
   int userScore = 10;
   int aiScore = 40;
   String currentCalculationResult = "";
@@ -62,7 +67,6 @@ class _GameViewState extends State<GameView> {
       case 2:
         remainingSeconds = 8 * 60;
         break;
-      case 1:
       default:
         remainingSeconds = 10 * 60;
         break;
@@ -72,11 +76,11 @@ class _GameViewState extends State<GameView> {
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (remainingSeconds > 0)
+      if (remainingSeconds > 0) {
         setState(() {
           remainingSeconds--;
         });
-      else {
+      } else {
         _stopAllTimers();
         GameDialogHelper.showLoseDialog(context, "Waktu Habis!");
       }
@@ -84,6 +88,7 @@ class _GameViewState extends State<GameView> {
   }
 
   void _startAITimer() {
+    // Skill BOY memperlambat AI
     int aiInterval = GameConfig.selectedCharacter == "BOY" ? 5 : 3;
     _aiTimer = Timer.periodic(Duration(seconds: aiInterval), (timer) {
       if (mounted) {
@@ -110,6 +115,7 @@ class _GameViewState extends State<GameView> {
       setState(() {
         hintedRoute.clear();
       });
+    // Skill BUBU memberikan hint rute
     if (GameConfig.selectedCharacter == "BUBU") {
       _idleTimer = Timer(const Duration(seconds: 5), () {
         if (mounted) {
@@ -142,17 +148,18 @@ class _GameViewState extends State<GameView> {
   void _initRandomInventory() {
     gridNodes = List.generate(
         GameConfig.crossAxisCount * GameConfig.mainAxisCount, (index) {
-      if (_random.nextDouble() > 0.3)
+      if (_random.nextDouble() > 0.3) {
         return NodeModel(
             id: index,
             value: (_random.nextInt(9) + 1).toString(),
             type: NodeType.number);
-      else
+      } else {
         return NodeModel(
             id: index,
             value: GameConfig
                 .operators[_random.nextInt(GameConfig.operators.length)],
             type: NodeType.operator);
+      }
     });
   }
 
@@ -164,7 +171,7 @@ class _GameViewState extends State<GameView> {
     easyTargets.clear();
     mediumTargets.clear();
     hardTargets.clear();
-    for (int i = 0; i < batchSize; i++)
+    for (int i = 0; i < batchSize; i++) {
       easyTargets.add(QCService.pullUniqueFromInventory(
           gridNodes: gridNodes,
           possibleLengths: [3],
@@ -172,7 +179,8 @@ class _GameViewState extends State<GameView> {
           maxResult: 20,
           allowedOperators: ['+', '-'],
           excludeList: _getAllActiveOrders()));
-    for (int i = 0; i < batchSize; i++)
+    }
+    for (int i = 0; i < batchSize; i++) {
       mediumTargets.add(QCService.pullUniqueFromInventory(
           gridNodes: gridNodes,
           possibleLengths: [3, 5],
@@ -180,7 +188,8 @@ class _GameViewState extends State<GameView> {
           maxResult: 50,
           allowedOperators: ['+', '-', 'x'],
           excludeList: _getAllActiveOrders()));
-    for (int i = 0; i < batchSize; i++)
+    }
+    for (int i = 0; i < batchSize; i++) {
       hardTargets.add(QCService.pullUniqueFromInventory(
           gridNodes: gridNodes,
           possibleLengths: [5, 7],
@@ -188,13 +197,13 @@ class _GameViewState extends State<GameView> {
           maxResult: 100,
           allowedOperators: ['+', '-', 'x', '÷'],
           excludeList: _getAllActiveOrders()));
+    }
   }
 
   void _showFloatingAnimation(String text, Color color) {
     if (!mounted) return;
     final overlay = Overlay.of(context);
     late OverlayEntry entry;
-
     entry = OverlayEntry(
       builder: (context) => FloatingScoreWidget(
         text: text,
@@ -204,7 +213,6 @@ class _GameViewState extends State<GameView> {
         },
       ),
     );
-
     overlay.insert(entry);
   }
 
@@ -293,6 +301,7 @@ class _GameViewState extends State<GameView> {
             excludeList: _getAllActiveOrders());
       } else if (hIdx != -1) {
         isOrderFulfilled = true;
+        // Skill GIRL memberikan poin ekstra
         earned = GameConfig.selectedCharacter == "GIRL" ? 10 : 9;
         _showFloatingAnimation("+$earned", Colors.orange[600]!);
         hardTargets[hIdx] = QCService.pullUniqueFromInventory(
@@ -305,6 +314,7 @@ class _GameViewState extends State<GameView> {
       }
 
       if (isOrderFulfilled) {
+        AudioService.playSuccessSFX();
         QCService.restockInventory(activeDeliveryRoute, gridNodes);
         setState(() {
           userScore += earned;
@@ -408,6 +418,7 @@ class _GameViewState extends State<GameView> {
                       Expanded(
                         child: Row(
                           children: [
+                            // Grid Permainan (Flex 5)
                             Expanded(
                               flex: 5,
                               child: Center(
@@ -463,11 +474,13 @@ class _GameViewState extends State<GameView> {
                                 ),
                               ),
                             ),
+                            // Kotak Preview (Flex 2)
                             Expanded(
                                 flex: 2,
                                 child: Center(
                                     child: ResultPreviewWidget(
                                         result: currentCalculationResult))),
+                            // Daftar Target (Flex 5)
                             Expanded(
                               flex: 5,
                               child: Row(

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class GameConfig {
@@ -12,11 +10,12 @@ class GameConfig {
 
 // --- SISTEM PROGRES LEVEL ---
   // Level 1 selalu terbuka (unlocked)
-  static int latestUnlockedLevel = 1;
+  static int latestUnlockedLevel = 4;
 
 // --- TAMBAHAN: Menyimpan Karakter yang Dipilih ---
   static String selectedCharacter = "BUBU"; // Default awal
-  static Color selectedBorderColor = Colors.blue[300]!; // Default warna border
+  static Color selectedBorderColor = Colors.blue; // Default warna border
+  static String selectedBorderType = "flow"; // Default tipe animasi
 
   // Rentang angka yang akan muncul (misal 1 sampai 9)
   static const int minNumber = 1;

@@ -19,32 +19,34 @@ class FloatingScoreWidget extends StatefulWidget {
 class _FloatingScoreWidgetState extends State<FloatingScoreWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _dyAnimation;
+  late Animation<Offset> _offsetAnimation;
   late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
     super.initState();
-    // Durasi animasi melayang = 1.5 detik
     _controller = AnimationController(
+      duration: const Duration(seconds: 1),
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
     );
 
-    // Animasi bergerak ke atas (Sumbu Y negatif) sebesar 200 pixel
-    _dyAnimation = Tween<double>(begin: 0, end: -200).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 0.0),
+      end: const Offset(0.0, -2.0),
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    ));
 
-    // Animasi memudar perlahan (Opacity 1.0 ke 0.0)
-    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _opacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+    ));
 
-    // Langsung mulai jalankan animasi begitu dibuat
-    _controller.forward().then((_) {
-      widget.onComplete(); // Panggil fungsi pembersihan setelah selesai
-    });
+    _controller.forward().then((_) => widget.onComplete());
   }
 
   @override
@@ -55,39 +57,33 @@ class _FloatingScoreWidgetState extends State<FloatingScoreWidget>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Positioned(
-          // Posisi awal muncul: Agak ke tengah kanan dekat papan target angka
-          top: MediaQuery.of(context).size.height / 2 + _dyAnimation.value,
-          right: MediaQuery.of(context).size.width / 4,
+    return Positioned(
+      bottom: MediaQuery.of(context).size.height * 0.2,
+      left: MediaQuery.of(context).size.width * 0.45,
+      child: FadeTransition(
+        opacity: _opacityAnimation,
+        child: SlideTransition(
+          position: _offsetAnimation,
           child: Material(
-            type: MaterialType
-                .transparency, // Cegah error double underline kuning
-            child: Opacity(
-              opacity: _opacityAnimation.value,
-              child: Text(
-                widget.text,
-                style: TextStyle(
-                  fontSize: 64, // Ukuran teks besar agar memuaskan
-                  fontWeight: FontWeight.w900,
-                  color: widget.color,
-                  shadows: const [
-                    Shadow(
-                        color: Colors.white,
-                        blurRadius: 10), // Aura bersinar putih
-                    Shadow(
-                        color: Colors.black45,
-                        offset: Offset(2, 4),
-                        blurRadius: 4),
-                  ],
-                ),
+            color: Colors.transparent,
+            child: Text(
+              widget.text,
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.w900,
+                color: widget.color,
+                shadows: const [
+                  Shadow(
+                    color: Colors.black45,
+                    offset: Offset(2, 2),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

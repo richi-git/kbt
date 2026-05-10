@@ -18,10 +18,11 @@ class TargetColumnWidget extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4.0),
         decoration: BoxDecoration(
-          color:
-              Colors.white.withOpacity(0.9), // Latar belakang putih transparan
+          color: Colors.white
+              .withValues(alpha: 0.9), // Latar belakang putih transparan
           borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: headerColor.withOpacity(0.5), width: 2),
+          border:
+              Border.all(color: headerColor.withValues(alpha: 0.5), width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -65,4 +66,3 @@ class TargetColumnWidget extends StatelessWidget {
     );
   }
 }
-  

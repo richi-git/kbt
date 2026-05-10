@@ -18,7 +18,7 @@ class NodeWidget extends StatelessWidget {
         boxShadow: [
           if (!node.isSelected)
             BoxShadow(
-              color: Colors.blueGrey.withOpacity(0.2),
+              color: Colors.blueGrey.withValues(alpha: 0.2),
               blurRadius: 2,
               offset: const Offset(1, 2),
             )

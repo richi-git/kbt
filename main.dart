@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:praktikum_1/view/game_view.dart';
 import 'package:praktikum_1/widget/navigation.dart';
 
 // Pastikan path ini sesuai dengan tempat kamu menyimpan GameView.

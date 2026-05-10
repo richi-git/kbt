@@ -11,6 +11,7 @@ import 'package:praktikum_1/service/qc_service.dart';
 import 'package:praktikum_1/service/audio_service.dart';
 import 'package:praktikum_1/widget/game_dialog_helper.dart';
 import 'package:praktikum_1/widget/floating_score_widget.dart';
+import 'package:praktikum_1/widget/animated_border_painter.dart';
 
 class GameView extends StatefulWidget {
   final String bgImagePath;
@@ -26,7 +27,8 @@ class GameView extends StatefulWidget {
   State<GameView> createState() => _GameViewState();
 }
 
-class _GameViewState extends State<GameView> {
+class _GameViewState extends State<GameView>
+    with SingleTickerProviderStateMixin {
   late List<NodeModel> gridNodes;
   final Random _random = Random();
 
@@ -46,6 +48,8 @@ class _GameViewState extends State<GameView> {
   List<int> hintedRoute = [];
   late int remainingSeconds;
 
+  late AnimationController _borderAnimationController;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +58,11 @@ class _GameViewState extends State<GameView> {
     _initTimerConfig();
     _startAITimer();
     _resetIdleTimer();
+
+    _borderAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
   }
 
   void _initTimerConfig() {
@@ -111,20 +120,22 @@ class _GameViewState extends State<GameView> {
 
   void _resetIdleTimer() {
     _idleTimer?.cancel();
-    if (hintedRoute.isNotEmpty)
+    if (hintedRoute.isNotEmpty) {
       setState(() {
         hintedRoute.clear();
       });
+    }
     // Skill BUBU memberikan hint rute
     if (GameConfig.selectedCharacter == "BUBU") {
       _idleTimer = Timer(const Duration(seconds: 5), () {
         if (mounted) {
           List<int> route =
               QCService.findHintRoute(gridNodes, _getAllActiveOrders());
-          if (route.isNotEmpty)
+          if (route.isNotEmpty) {
             setState(() {
               hintedRoute = route;
             });
+          }
         }
       });
     }
@@ -142,6 +153,7 @@ class _GameViewState extends State<GameView> {
   @override
   void dispose() {
     _stopAllTimers();
+    _borderAnimationController.dispose();
     super.dispose();
   }
 
@@ -230,13 +242,16 @@ class _GameViewState extends State<GameView> {
       if ((position.dx % cellW) / cellW < 0.2 ||
           (position.dx % cellW) / cellW > 0.8 ||
           (position.dy % cellH) / cellH < 0.2 ||
-          (position.dy % cellH) / cellH > 0.8) return;
+          (position.dy % cellH) / cellH > 0.8) {
+        return;
+      }
       int index = row * GameConfig.crossAxisCount + col;
       if (activeDeliveryRoute.contains(index)) {
         if (activeDeliveryRoute.length > 1 &&
             activeDeliveryRoute[activeDeliveryRoute.length - 2] == index) {
           setState(() {
             gridNodes[activeDeliveryRoute.removeLast()].isSelected = false;
+            AudioService.playBubblePopSFX();
             currentCalculationResult = (activeDeliveryRoute.isNotEmpty &&
                     QCService.validateRoute(activeDeliveryRoute, gridNodes))
                 ? QCService.calculateOutput(activeDeliveryRoute, gridNodes)
@@ -249,11 +264,14 @@ class _GameViewState extends State<GameView> {
       if (activeDeliveryRoute.isNotEmpty) {
         int lIdx = activeDeliveryRoute.last;
         if ((row - lIdx ~/ GameConfig.crossAxisCount).abs() > 1 ||
-            (col - lIdx % GameConfig.crossAxisCount).abs() > 1) return;
+            (col - lIdx % GameConfig.crossAxisCount).abs() > 1) {
+          return;
+        }
       }
       setState(() {
         activeDeliveryRoute.add(index);
         gridNodes[index].isSelected = true;
+        AudioService.playBubblePopSFX();
         currentCalculationResult =
             QCService.validateRoute(activeDeliveryRoute, gridNodes)
                 ? QCService.calculateOutput(activeDeliveryRoute, gridNodes)
@@ -324,8 +342,9 @@ class _GameViewState extends State<GameView> {
             userScore = 50;
             aiScore = 0;
             _stopAllTimers();
-            if (GameConfig.latestUnlockedLevel < 4)
+            if (GameConfig.latestUnlockedLevel < 4) {
               GameConfig.latestUnlockedLevel++;
+            }
             GameDialogHelper.showWinDialog(context);
           }
         });
@@ -333,8 +352,9 @@ class _GameViewState extends State<GameView> {
     }
 
     setState(() {
-      for (int index in activeDeliveryRoute)
+      for (int index in activeDeliveryRoute) {
         gridNodes[index].isSelected = false;
+      }
       activeDeliveryRoute.clear();
       currentCalculationResult = "";
     });
@@ -363,11 +383,27 @@ class _GameViewState extends State<GameView> {
                         iconSize: 48,
                         onPressed: () {
                           _stopAllTimers();
-                          GameDialogHelper.showPauseMenu(context, () {
-                            _startTimer();
-                            _startAITimer();
-                            _resetIdleTimer();
-                          });
+                          GameDialogHelper.showPauseMenu(
+                            context,
+                            onResume: () {
+                              _startTimer();
+                              _startAITimer();
+                              _resetIdleTimer();
+                            },
+                            onRestart: () {
+                              setState(() {
+                                userScore = 10;
+                                aiScore = 40;
+                                currentCalculationResult = "";
+                                activeDeliveryRoute.clear();
+                                _initRandomInventory();
+                                _generateDemandForecast();
+                                _initTimerConfig();
+                                _startAITimer();
+                                _resetIdleTimer();
+                              });
+                            },
+                          );
                         }),
                     Container(
                         padding: const EdgeInsets.symmetric(
@@ -395,124 +431,140 @@ class _GameViewState extends State<GameView> {
                 ),
               ),
               Expanded(
-                child: Container(
-                  margin:
-                      const EdgeInsets.only(left: 16, right: 16, bottom: 24),
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(
-                        color: GameConfig.selectedBorderColor, width: 5),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 10,
-                          offset: Offset(0, 5))
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      ScoreBarWidget(userScore: userScore, aiScore: aiScore),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: Row(
-                          children: [
-                            // Grid Permainan (Flex 5)
-                            Expanded(
-                              flex: 5,
-                              child: Center(
-                                child: AspectRatio(
-                                  aspectRatio: 1,
-                                  child: LayoutBuilder(
-                                      builder: (context, constraints) {
-                                    return GestureDetector(
-                                      onPanStart: (details) => _planRoute(
-                                          details.localPosition, constraints),
-                                      onPanUpdate: (details) => _planRoute(
-                                          details.localPosition, constraints),
-                                      onPanEnd: (details) => _executeDelivery(),
-                                      child: GridView.builder(
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        gridDelegate:
-                                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount:
-                                                    GameConfig.crossAxisCount,
-                                                childAspectRatio: 1.0),
-                                        itemCount: gridNodes.length,
-                                        itemBuilder: (context, index) {
-                                          bool isHint =
-                                              hintedRoute.contains(index);
-                                          return Container(
-                                            decoration: isHint
-                                                ? BoxDecoration(
-                                                    border: Border.all(
-                                                        color:
-                                                            Colors.yellowAccent,
-                                                        width: 4),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    boxShadow: [
-                                                        BoxShadow(
-                                                            color: Colors
-                                                                .yellowAccent
-                                                                .withOpacity(
-                                                                    0.6),
-                                                            blurRadius: 8,
-                                                            spreadRadius: 2)
-                                                      ])
-                                                : null,
-                                            child: NodeWidget(
-                                                node: gridNodes[index]),
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  }),
-                                ),
-                              ),
-                            ),
-                            // Kotak Preview (Flex 2)
-                            Expanded(
-                                flex: 2,
-                                child: Center(
-                                    child: ResultPreviewWidget(
-                                        result: currentCalculationResult))),
-                            // Daftar Target (Flex 5)
-                            Expanded(
-                              flex: 5,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  TargetColumnWidget(
-                                      header: '+3',
-                                      targets: easyTargets,
-                                      headerColor: Colors.green[600]!),
-                                  TargetColumnWidget(
-                                      header: '+5',
-                                      targets: mediumTargets,
-                                      headerColor: Colors.purple[600]!),
-                                  TargetColumnWidget(
-                                      header: '+9',
-                                      targets: hardTargets,
-                                      headerColor: Colors.orange[600]!),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                child: AnimatedBuilder(
+                  animation: _borderAnimationController,
+                  builder: (context, child) {
+                    return Container(
+                      margin: const EdgeInsets.only(
+                          left: 16, right: 16, bottom: 24),
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 5))
+                        ],
                       ),
-                    ],
-                  ),
+                      child: Stack(
+                        children: [
+                          // ANIMATED BORDER - Berada di lapisan paling bawah stack, pas dengan kontainer
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: MLBorderPainter(
+                                color: GameConfig.selectedBorderColor,
+                                progress: _borderAnimationController.value,
+                                type: GameConfig.selectedBorderType,
+                                isHovered: true,
+                                borderRadius: 30.0,
+                              ),
+                            ),
+                          ),
+                          // GAME CONTENT - Menggunakan Padding agar konten tidak menempel ke border tebal
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                ScoreBarWidget(
+                                    userScore: userScore, aiScore: aiScore),
+                                const SizedBox(height: 16),
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      // GRID (Kiri)
+                                      Expanded(
+                                        flex: 2,
+                                        child: Center(
+                                          child: AspectRatio(
+                                            aspectRatio: 1,
+                                            child: LayoutBuilder(builder:
+                                                (context, constraints) {
+                                              return _buildGrid(constraints);
+                                            }),
+                                          ),
+                                        ),
+                                      ),
+                                      // RESULT PREVIEW (Tengah)
+                                      Expanded(
+                                        flex: 1,
+                                        child: Center(
+                                          child: ResultPreviewWidget(
+                                              result: currentCalculationResult),
+                                        ),
+                                      ),
+                                      // TARGETS (Kanan)
+                                      Expanded(
+                                        flex: 2,
+                                        child: _buildTargetsRow(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildGrid(BoxConstraints constraints) {
+    return GestureDetector(
+      onPanStart: (details) => _planRoute(details.localPosition, constraints),
+      onPanUpdate: (details) => _planRoute(details.localPosition, constraints),
+      onPanEnd: (details) => _executeDelivery(),
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: GameConfig.crossAxisCount, childAspectRatio: 1.0),
+        itemCount: gridNodes.length,
+        itemBuilder: (context, index) {
+          bool isHint = hintedRoute.contains(index);
+          return Container(
+            decoration: isHint
+                ? BoxDecoration(
+                    border: Border.all(color: Colors.yellowAccent, width: 4),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                        BoxShadow(
+                            color: Colors.yellowAccent.withValues(alpha: 0.6),
+                            blurRadius: 8,
+                            spreadRadius: 2)
+                      ])
+                : null,
+            child: NodeWidget(node: gridNodes[index]),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTargetsRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        TargetColumnWidget(
+            header: '+3',
+            targets: easyTargets,
+            headerColor: Colors.green[600]!),
+        TargetColumnWidget(
+            header: '+5',
+            targets: mediumTargets,
+            headerColor: Colors.purple[600]!),
+        TargetColumnWidget(
+            header: '+9',
+            targets: hardTargets,
+            headerColor: Colors.orange[600]!),
+      ],
     );
   }
 }

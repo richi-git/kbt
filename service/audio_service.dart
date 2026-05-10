@@ -1,32 +1,44 @@
 import 'package:audioplayers/audioplayers.dart';
 
 class AudioService {
-  static final AudioPlayer _sfxPlayer = AudioPlayer();
+  static final AudioPlayer _successPlayer = AudioPlayer();
+  static final AudioPlayer _bubblePlayer = AudioPlayer();
 
-  // Variabel untuk mencatat kapan terakhir kali suara diputar
-  static DateTime _lastPlayed =
+  // Variabel untuk mencatat kapan terakhir kali suara diputar secara terpisah
+  static DateTime _lastSuccessPlayed =
+      DateTime.now().subtract(const Duration(seconds: 2));
+  static DateTime _lastBubblePlayed =
       DateTime.now().subtract(const Duration(seconds: 2));
 
   static Future<void> playSuccessSFX() async {
-    // ANTI-SPAM (Debounce): Jika jarak dari suara terakhir kurang dari 500 milidetik, abaikan
-    if (DateTime.now().difference(_lastPlayed).inMilliseconds < 500) {
+    if (DateTime.now().difference(_lastSuccessPlayed).inMilliseconds < 400) {
       return;
     }
-    _lastPlayed = DateTime.now();
+    _lastSuccessPlayed = DateTime.now();
 
     try {
-      // Gunakan ReleaseMode.stop agar audio otomatis bersih dari memori setelah selesai bunyi
-      await _sfxPlayer.setReleaseMode(ReleaseMode.stop);
-
-      // Putar audio
-      await _sfxPlayer.play(
-          AssetSource('audio/Bubble Pop Sound Effect - DigitalDials.mp3'));
+      await _successPlayer.stop();
+      await _successPlayer.play(AssetSource('audio/bubble_pop.mp3'));
     } catch (e) {
-      print("Gagal memutar audio: $e");
+      print("Error playing success SFX: $e");
     }
   }
 
-  // BGM (Biarkan jika nanti mau dipakai)
+  static Future<void> playBubblePopSFX() async {
+    if (DateTime.now().difference(_lastBubblePlayed).inMilliseconds < 20) {
+      return;
+    }
+    _lastBubblePlayed = DateTime.now();
+
+    try {
+      await _bubblePlayer.stop();
+      await _bubblePlayer.play(AssetSource('audio/bubble_pop.mp3'), mode: PlayerMode.lowLatency);
+    } catch (e) {
+      print("Error playing bubble pop SFX: $e");
+    }
+  }
+
+  // BGM
   static final AudioPlayer _bgmPlayer = AudioPlayer();
   static Future<void> playBGM() async {
     await _bgmPlayer.setReleaseMode(ReleaseMode.loop);

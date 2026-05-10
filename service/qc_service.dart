@@ -5,7 +5,7 @@ import 'package:praktikum_1/config/game_config.dart';
 class QCService {
   static final Random _random = Random();
 
-  // --- LOGIKA VALIDASI & OUTPUT (YANG LAMA) ---
+  // --- LOGIKA VALIDASI & OUTPUT ---
   static bool validateRoute(List<int> route, List<NodeModel> inventory) {
     if (route.length < 3 || route.length % 2 == 0) return false;
     for (int i = 0; i < route.length; i++) {
@@ -21,13 +21,13 @@ class QCService {
     for (int i = 1; i < route.length; i += 2) {
       String op = inventory[route[i]].value;
       int nextNum = int.parse(inventory[route[i + 1]].value);
-      if (op == '+')
+      if (op == '+') {
         result += nextNum;
-      else if (op == '-')
+      } else if (op == '-') {
         result -= nextNum;
-      else if (op == 'x')
+      } else if (op == 'x') {
         result *= nextNum;
-      else if (op == '÷') {
+      } else if (op == '÷') {
         if (nextNum == 0 || result % nextNum != 0) return -9999;
         result ~/= nextNum;
       }
@@ -123,8 +123,9 @@ class QCService {
     while (fallbackAttempts < 50) {
       fallbackAttempts++;
       int fallback = _random.nextInt(maxResult - minResult + 1) + minResult;
-      if (!excludeList.contains(fallback.toString()))
+      if (!excludeList.contains(fallback.toString())) {
         return fallback.toString();
+      }
     }
     return (_random.nextInt(maxResult - minResult + 1) + minResult).toString();
   }

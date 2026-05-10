@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:praktikum_1/widget/math_background.dart';
 
 class StorePage extends StatefulWidget {
   const StorePage({super.key});
@@ -45,6 +46,38 @@ class _StorePageState extends State<StorePage> {
       "isOwned": false,
       "isEquipped": false
     },
+    {
+      "name": "CYBORG BUBU",
+      "icon": Icons.smart_toy_outlined,
+      "color": Colors.purple[400],
+      "price": 1200,
+      "isOwned": false,
+      "isEquipped": false
+    },
+    {
+      "name": "PIRATE BOY",
+      "icon": Icons.face_retouching_natural,
+      "color": Colors.orange[400],
+      "price": 1000,
+      "isOwned": false,
+      "isEquipped": false
+    },
+    {
+      "name": "QUEEN GIRL",
+      "icon": Icons.face_3,
+      "color": Colors.purple[800],
+      "price": 1500,
+      "isOwned": false,
+      "isEquipped": false
+    },
+    {
+      "name": "ASTRONAUT BUBU",
+      "icon": Icons.rocket_launch,
+      "color": Colors.indigo[400],
+      "price": 2000,
+      "isOwned": false,
+      "isEquipped": false
+    },
   ];
 
   // Data Mockup untuk Border/Frame Box Game
@@ -77,6 +110,34 @@ class _StorePageState extends State<StorePage> {
       "isOwned": false,
       "isEquipped": false
     },
+    {
+      "name": "Magma Red",
+      "color": Colors.redAccent,
+      "price": 450,
+      "isOwned": false,
+      "isEquipped": false
+    },
+    {
+      "name": "Ocean Wave",
+      "color": Colors.cyan,
+      "price": 350,
+      "isOwned": false,
+      "isEquipped": false
+    },
+    {
+      "name": "Amethyst",
+      "color": Colors.purpleAccent,
+      "price": 500,
+      "isOwned": false,
+      "isEquipped": false
+    },
+    {
+      "name": "Silver Plate",
+      "color": Colors.grey[400],
+      "price": 200,
+      "isOwned": false,
+      "isEquipped": false
+    },
   ];
 
   @override
@@ -84,67 +145,62 @@ class _StorePageState extends State<StorePage> {
     return DefaultTabController(
       length: 2, // 2 Tab: Skin & Border
       child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/beachmap.jpeg'), // Background seragam
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: Column(
-                  children: [
-                    // === HEADER & COIN ===
-                    _buildHeader(),
+        body: Stack(
+          children: [
+            const MathBackground(),
+            SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Column(
+                    children: [
+                      // === HEADER & COIN ===
+                      _buildHeader(),
 
-                    // === TAB BAR KATEGORI ===
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(25),
-                        border: Border.all(color: Colors.blue[300]!, width: 2),
-                      ),
-                      child: TabBar(
-                        indicator: BoxDecoration(
-                          color: Colors.amber[500],
+                      // === TAB BAR KATEGORI ===
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(25),
+                          border:
+                              Border.all(color: Colors.blue[300]!, width: 2),
                         ),
-                        labelColor: Colors.white,
-                        unselectedLabelColor: Colors.blue[800],
-                        labelStyle: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        dividerColor:
-                            Colors.transparent, // Hilangkan garis bawah default
-                        tabs: const [
-                          Tab(text: "SKIN KARAKTER"),
-                          Tab(text: "FRAME BORDER"),
-                        ],
+                        child: TabBar(
+                          indicator: BoxDecoration(
+                            color: Colors.amber[500],
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          labelColor: Colors.white,
+                          unselectedLabelColor: Colors.blue[800],
+                          labelStyle: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          dividerColor: Colors
+                              .transparent, // Hilangkan garis bawah default
+                          tabs: const [
+                            Tab(text: "SKIN KARAKTER"),
+                            Tab(text: "FRAME BORDER"),
+                          ],
+                        ),
                       ),
-                    ),
 
-                    // === ISI TAB (KONTEN TOKO) ===
-                    Expanded(
-                      child: TabBarView(
-                        children: [
-                          _buildGridContent(skinItems, isSkin: true),
-                          _buildGridContent(borderItems, isSkin: false),
-                        ],
+                      // === ISI TAB (KONTEN TOKO) ===
+                      Expanded(
+                        child: TabBarView(
+                          children: [
+                            _buildGridContent(skinItems, isSkin: true),
+                            _buildGridContent(borderItems, isSkin: false),
+                          ],
+                        ),
                       ),
-                    ),
-
-                    // FIX: Spasi kosong manual (SizedBox) dihapus agar UI tidak terdorong ke atas
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -156,7 +212,7 @@ class _StorePageState extends State<StorePage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D47A1).withOpacity(0.9),
+        color: const Color(0xFF0D47A1).withValues(alpha: 0.9),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
@@ -167,10 +223,10 @@ class _StorePageState extends State<StorePage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Judul Header
-          Column(
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "STORE",
                 style: TextStyle(
                   fontSize: 32,
@@ -183,7 +239,7 @@ class _StorePageState extends State<StorePage> {
                 "Kustomisasi permainanmu!",
                 style: TextStyle(
                     fontSize: 14,
-                    color: Colors.blue[100],
+                    color: Colors.white70,
                     fontWeight: FontWeight.bold),
               ),
             ],
@@ -224,150 +280,178 @@ class _StorePageState extends State<StorePage> {
   // --- WIDGET GRID UNTUK ITEM ---
   Widget _buildGridContent(List<Map<String, dynamic>> items,
       {required bool isSkin}) {
-    // FIX: Membungkus dengan Center agar konten berada pas di tengah secara vertikal
     return Center(
       child: GridView.builder(
-        shrinkWrap:
-            true, // FIX: Membuat grid hanya mengambil tinggi sesuai isi kontennya
+        shrinkWrap: true,
         physics: const BouncingScrollPhysics(),
-        // FIX: Padding bottom diperbesar untuk menghindari tabrakan dengan Navigation Bar
         padding: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 90),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 250, // Sedikit diperbesar agar proporsional
-          childAspectRatio: 0.75, // Rasio direntangkan sedikit
+          maxCrossAxisExtent: 250,
+          childAspectRatio: 0.75,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
-          return _buildStoreCard(item, isSkin);
+          return _StoreCard(item: item, isSkin: isSkin);
         },
       ),
     );
   }
+}
 
-  // --- WIDGET KARTU ITEM ---
-  Widget _buildStoreCard(Map<String, dynamic> item, bool isSkin) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: item['color'], width: 4),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4))
-        ],
-      ),
-      child: Column(
-        children: [
-          // Gambar / Visual Visual
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: item['color'].withOpacity(0.2),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: isSkin
-                  ? Icon(item['icon'], size: 80, color: item['color'])
-                  : Center(
-                      // Preview untuk Border
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: item['color'], width: 5),
-                        ),
-                        child: Center(
-                            child: Text("12",
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: item['color']))),
-                      ),
-                    ),
-            ),
-          ),
+class _StoreCard extends StatefulWidget {
+  final Map<String, dynamic> item;
+  final bool isSkin;
+  const _StoreCard({required this.item, required this.isSkin});
 
-          // Informasi Item
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item['name'],
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14,
-                      color: Colors.blue[900]),
+  @override
+  State<_StoreCard> createState() => _StoreCardState();
+}
+
+class _StoreCardState extends State<_StoreCard> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    final isSkin = widget.isSkin;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        transform: isHovered
+            ? (Matrix4.diagonal3Values(1.05, 1.05, 1.0))
+            : Matrix4.identity(),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.95),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+              color: isHovered ? Colors.blue : item['color'], width: 4),
+          boxShadow: [
+            BoxShadow(
+                color: isHovered
+                    ? item['color'].withValues(alpha: 0.4)
+                    : Colors.black26,
+                blurRadius: isHovered ? 15 : 8,
+                offset: Offset(0, isHovered ? 8 : 4))
+          ],
+        ),
+        child: Column(
+          children: [
+            // Gambar / Visual Visual
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: item['color'].withValues(alpha: 0.2),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                const SizedBox(height: 6),
+                child: isSkin
+                    ? Icon(item['icon'], size: 80, color: item['color'])
+                    : Center(
+                        // Preview untuk Border
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: item['color'], width: 5),
+                          ),
+                          child: Center(
+                              child: Text("12",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: item['color']))),
+                        ),
+                      ),
+              ),
+            ),
 
-                // Harga atau Status
-                if (!item['isOwned'])
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.monetization_on_rounded,
-                          color: Colors.amber, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        item['price'].toString(),
+            // Informasi Item
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    item['name'],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 14,
+                        color: Colors.blue[900]),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Harga atau Status
+                  if (!item['isOwned'])
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.monetization_on_rounded,
+                            color: Colors.amber, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          item['price'].toString(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.amber),
+                        ),
+                      ],
+                    )
+                  else
+                    const Text(
+                      "DIMILIKI",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.green),
+                    ),
+
+                  const SizedBox(height: 8),
+
+                  // Tombol Aksi
+                  SizedBox(
+                    width: double.infinity,
+                    height: 32,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // TODO: Tambahkan logika pembelian/penggunaan di sini nanti
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: item['isEquipped']
+                            ? Colors.grey[400]
+                            : (item['isOwned'] ? Colors.blue : Colors.green),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Text(
+                        item['isEquipped']
+                            ? "DIPAKAI"
+                            : (item['isOwned'] ? "GUNAKAN" : "BELI"),
                         style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.amber),
+                            color: Colors.white,
+                            fontSize: 12),
                       ),
-                    ],
-                  )
-                else
-                  const Text(
-                    "DIMILIKI",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: Colors.green),
-                  ),
-
-                const SizedBox(height: 8),
-
-                // Tombol Aksi
-                SizedBox(
-                  width: double.infinity,
-                  height: 32,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Tambahkan logika pembelian/penggunaan di sini nanti
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: item['isEquipped']
-                          ? Colors.grey[400]
-                          : (item['isOwned'] ? Colors.blue : Colors.green),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      padding: EdgeInsets.zero,
-                    ),
-                    child: Text(
-                      item['isEquipped']
-                          ? "DIPAKAI"
-                          : (item['isOwned'] ? "GUNAKAN" : "BELI"),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 12),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

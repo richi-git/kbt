@@ -18,7 +18,7 @@ class _NotificationState extends State<NotificationPage> {
           backgroundColor: Colors.white,
         ),
       ),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: Center(
           child: Text("Halaman Notofikasi"),
         ),

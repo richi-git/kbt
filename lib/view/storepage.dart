@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:praktikum_1/service/currency_service.dart';
+import 'package:praktikum_1/view/topup_page.dart';
 import 'package:praktikum_1/widget/math_background.dart';
 
 class StorePage extends StatefulWidget {
@@ -9,9 +11,6 @@ class StorePage extends StatefulWidget {
 }
 
 class _StorePageState extends State<StorePage> {
-  // Mockup Saldo Koin Pemain
-  int userCoins = 1250;
-
   // Data Mockup untuk Skin Karakter
   final List<Map<String, dynamic>> skinItems = [
     {
@@ -155,7 +154,7 @@ class _StorePageState extends State<StorePage> {
                   child: Column(
                     children: [
                       // === HEADER & COIN ===
-                      _buildHeader(),
+                      _buildHeader(context),
 
                       // === TAB BAR KATEGORI ===
                       Container(
@@ -207,7 +206,7 @@ class _StorePageState extends State<StorePage> {
   }
 
   // --- WIDGET HEADER + INDIKATOR KOIN ---
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -246,30 +245,45 @@ class _StorePageState extends State<StorePage> {
           ),
 
           // Indikator Koin
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.amber[600],
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.yellow[200]!, width: 2),
-              boxShadow: const [
-                BoxShadow(
-                    color: Colors.black26, offset: Offset(0, 3), blurRadius: 4)
-              ],
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.monetization_on_rounded,
-                    color: Colors.white, size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  userCoins.toString(),
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white),
-                ),
-              ],
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TopUpPage()),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber[600],
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.yellow[200]!, width: 2),
+                boxShadow: const [
+                  BoxShadow(
+                      color: Colors.black26, offset: Offset(0, 3), blurRadius: 4)
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.monetization_on_rounded,
+                      color: Colors.white, size: 24),
+                  const SizedBox(width: 8),
+                  ValueListenableBuilder<int>(
+                    valueListenable: CurrencyService().coinsListenable,
+                    builder: (context, coins, child) {
+                      return Text(
+                        coins.toString(),
+                        style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.add_circle_outline_rounded, color: Colors.white, size: 20),
+                ],
+              ),
             ),
           ),
         ],
@@ -294,7 +308,26 @@ class _StorePageState extends State<StorePage> {
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
-          return _StoreCard(item: item, isSkin: isSkin);
+          return _StoreCard(
+            item: item,
+            isSkin: isSkin,
+            onPurchase: () {
+              setState(() {
+                // Update local state to reflect purchase
+                // In a real app, this would be updated in the database
+                item['isOwned'] = true;
+              });
+            },
+            onEquip: () {
+              setState(() {
+                // Un-equip other items in the same category
+                for (var otherItem in items) {
+                  otherItem['isEquipped'] = false;
+                }
+                item['isEquipped'] = true;
+              });
+            },
+          );
         },
       ),
     );
@@ -304,7 +337,14 @@ class _StorePageState extends State<StorePage> {
 class _StoreCard extends StatefulWidget {
   final Map<String, dynamic> item;
   final bool isSkin;
-  const _StoreCard({required this.item, required this.isSkin});
+  final VoidCallback onPurchase;
+  final VoidCallback onEquip;
+  const _StoreCard({
+    required this.item,
+    required this.isSkin,
+    required this.onPurchase,
+    required this.onEquip,
+  });
 
   @override
   State<_StoreCard> createState() => _StoreCardState();
@@ -426,7 +466,29 @@ class _StoreCardState extends State<_StoreCard> {
                     height: 32,
                     child: ElevatedButton(
                       onPressed: () {
-                        // TODO: Tambahkan logika pembelian/penggunaan di sini nanti
+                        if (item['isOwned']) {
+                          if (!item['isEquipped']) {
+                            widget.onEquip();
+                          }
+                        } else {
+                          // Logika Beli Item
+                          if (CurrencyService().spendCoins(item['price'])) {
+                            widget.onPurchase();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Berhasil membeli ${item['name']}!"),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Koin tidak cukup!"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: item['isEquipped']

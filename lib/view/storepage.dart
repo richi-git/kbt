@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:praktikum_1/service/currency_service.dart';
+import 'package:praktikum_1/service/item_service.dart';
 import 'package:praktikum_1/view/topup_page.dart';
 import 'package:praktikum_1/widget/math_background.dart';
 
@@ -11,134 +12,6 @@ class StorePage extends StatefulWidget {
 }
 
 class _StorePageState extends State<StorePage> {
-  // Data Mockup untuk Skin Karakter
-  final List<Map<String, dynamic>> skinItems = [
-    {
-      "name": "BUBU (Default)",
-      "icon": Icons.smart_toy,
-      "color": Colors.blue[400],
-      "price": 0,
-      "isOwned": true,
-      "isEquipped": true
-    },
-    {
-      "name": "PIRATE BUBU",
-      "icon": Icons.smart_toy,
-      "color": Colors.red[400],
-      "price": 500,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "NINJA BOY",
-      "icon": Icons.face_rounded,
-      "color": Colors.black87,
-      "price": 800,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "PRINCESS GIRL",
-      "icon": Icons.face_3_rounded,
-      "color": Colors.pink[300],
-      "price": 800,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "CYBORG BUBU",
-      "icon": Icons.smart_toy_outlined,
-      "color": Colors.purple[400],
-      "price": 1200,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "PIRATE BOY",
-      "icon": Icons.face_retouching_natural,
-      "color": Colors.orange[400],
-      "price": 1000,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "QUEEN GIRL",
-      "icon": Icons.face_3,
-      "color": Colors.purple[800],
-      "price": 1500,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "ASTRONAUT BUBU",
-      "icon": Icons.rocket_launch,
-      "color": Colors.indigo[400],
-      "price": 2000,
-      "isOwned": false,
-      "isEquipped": false
-    },
-  ];
-
-  // Data Mockup untuk Border/Frame Box Game
-  final List<Map<String, dynamic>> borderItems = [
-    {
-      "name": "Classic Blue",
-      "color": Colors.blue,
-      "price": 0,
-      "isOwned": true,
-      "isEquipped": true
-    },
-    {
-      "name": "Golden Frame",
-      "color": Colors.amber,
-      "price": 300,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "Toxic Green",
-      "color": Colors.greenAccent[700],
-      "price": 250,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "Neon Pink",
-      "color": Colors.pinkAccent,
-      "price": 400,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "Magma Red",
-      "color": Colors.redAccent,
-      "price": 450,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "Ocean Wave",
-      "color": Colors.cyan,
-      "price": 350,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "Amethyst",
-      "color": Colors.purpleAccent,
-      "price": 500,
-      "isOwned": false,
-      "isEquipped": false
-    },
-    {
-      "name": "Silver Plate",
-      "color": Colors.grey[400],
-      "price": 200,
-      "isOwned": false,
-      "isEquipped": false
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -161,7 +34,7 @@ class _StorePageState extends State<StorePage> {
                         margin: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: Colors.white.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(25),
                           border:
                               Border.all(color: Colors.blue[300]!, width: 2),
@@ -187,11 +60,16 @@ class _StorePageState extends State<StorePage> {
 
                       // === ISI TAB (KONTEN TOKO) ===
                       Expanded(
-                        child: TabBarView(
-                          children: [
-                            _buildGridContent(skinItems, isSkin: true),
-                            _buildGridContent(borderItems, isSkin: false),
-                          ],
+                        child: ListenableBuilder(
+                          listenable: ItemService(),
+                          builder: (context, child) {
+                            return TabBarView(
+                              children: [
+                                _buildGridContent(ItemService().skins, isSkin: true),
+                                _buildGridContent(ItemService().borders, isSkin: false),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -211,7 +89,7 @@ class _StorePageState extends State<StorePage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D47A1).withValues(alpha: 0.9),
+        color: const Color(0xFF0D47A1).withOpacity(0.9),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
@@ -292,7 +170,7 @@ class _StorePageState extends State<StorePage> {
   }
 
   // --- WIDGET GRID UNTUK ITEM ---
-  Widget _buildGridContent(List<Map<String, dynamic>> items,
+  Widget _buildGridContent(List<StoreItem> items,
       {required bool isSkin}) {
     return Center(
       child: GridView.builder(
@@ -311,22 +189,6 @@ class _StorePageState extends State<StorePage> {
           return _StoreCard(
             item: item,
             isSkin: isSkin,
-            onPurchase: () {
-              setState(() {
-                // Update local state to reflect purchase
-                // In a real app, this would be updated in the database
-                item['isOwned'] = true;
-              });
-            },
-            onEquip: () {
-              setState(() {
-                // Un-equip other items in the same category
-                for (var otherItem in items) {
-                  otherItem['isEquipped'] = false;
-                }
-                item['isEquipped'] = true;
-              });
-            },
           );
         },
       ),
@@ -335,15 +197,11 @@ class _StorePageState extends State<StorePage> {
 }
 
 class _StoreCard extends StatefulWidget {
-  final Map<String, dynamic> item;
+  final StoreItem item;
   final bool isSkin;
-  final VoidCallback onPurchase;
-  final VoidCallback onEquip;
   const _StoreCard({
     required this.item,
     required this.isSkin,
-    required this.onPurchase,
-    required this.onEquip,
   });
 
   @override
@@ -368,14 +226,14 @@ class _StoreCardState extends State<_StoreCard> {
             ? (Matrix4.diagonal3Values(1.05, 1.05, 1.0))
             : Matrix4.identity(),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
+          color: Colors.white.withOpacity(0.95),
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
-              color: isHovered ? Colors.blue : item['color'], width: 4),
+              color: isHovered ? Colors.blue : item.color, width: 4),
           boxShadow: [
             BoxShadow(
                 color: isHovered
-                    ? item['color'].withValues(alpha: 0.4)
+                    ? item.color.withOpacity(0.4)
                     : Colors.black26,
                 blurRadius: isHovered ? 15 : 8,
                 offset: Offset(0, isHovered ? 8 : 4))
@@ -388,12 +246,12 @@ class _StoreCardState extends State<_StoreCard> {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: item['color'].withValues(alpha: 0.2),
+                  color: item.color.withOpacity(0.2),
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: isSkin
-                    ? Icon(item['icon'], size: 80, color: item['color'])
+                    ? Icon(item.icon, size: 80, color: item.color)
                     : Center(
                         // Preview untuk Border
                         child: Container(
@@ -402,14 +260,14 @@ class _StoreCardState extends State<_StoreCard> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: item['color'], width: 5),
+                            border: Border.all(color: item.color, width: 5),
                           ),
                           child: Center(
                               child: Text("12",
                                   style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
-                                      color: item['color']))),
+                                      color: item.color))),
                         ),
                       ),
               ),
@@ -422,7 +280,7 @@ class _StoreCardState extends State<_StoreCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    item['name'],
+                    item.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -433,7 +291,7 @@ class _StoreCardState extends State<_StoreCard> {
                   const SizedBox(height: 6),
 
                   // Harga atau Status
-                  if (!item['isOwned'])
+                  if (!item.isOwned)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -441,7 +299,7 @@ class _StoreCardState extends State<_StoreCard> {
                             color: Colors.amber, size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          item['price'].toString(),
+                          item.price.toString(),
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -466,17 +324,15 @@ class _StoreCardState extends State<_StoreCard> {
                     height: 32,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (item['isOwned']) {
-                          if (!item['isEquipped']) {
-                            widget.onEquip();
-                          }
+                        if (item.isOwned) {
+                          // In Store, if owned, it's already in inventory.
                         } else {
                           // Logika Beli Item
-                          if (CurrencyService().spendCoins(item['price'])) {
-                            widget.onPurchase();
+                          if (CurrencyService().spendCoins(item.price)) {
+                            ItemService().purchaseItem(item.name);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text("Berhasil membeli ${item['name']}!"),
+                                content: Text("Berhasil membeli ${item.name}!"),
                                 backgroundColor: Colors.green,
                               ),
                             );
@@ -491,17 +347,13 @@ class _StoreCardState extends State<_StoreCard> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: item['isEquipped']
-                            ? Colors.grey[400]
-                            : (item['isOwned'] ? Colors.blue : Colors.green),
+                        backgroundColor: item.isOwned ? Colors.grey[400] : Colors.green,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                         padding: EdgeInsets.zero,
                       ),
                       child: Text(
-                        item['isEquipped']
-                            ? "DIPAKAI"
-                            : (item['isOwned'] ? "GUNAKAN" : "BELI"),
+                        item.isOwned ? "DIMILIKI" : "BELI",
                         style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:praktikum_1/config/game_config.dart';
+import 'package:praktikum_1/service/item_service.dart';
 import 'package:praktikum_1/widget/math_background.dart';
 import 'package:praktikum_1/widget/animated_border_painter.dart';
 
@@ -37,45 +38,6 @@ class _InventoryPageState extends State<InventoryPage>
     super.dispose();
   }
 
-  // Data Karakter
-  final List<Map<String, dynamic>> ownedCharacters = [
-    {
-      "name": "BUBU",
-      "image": Icons.smart_toy,
-      "color": Colors.blue[400],
-      "skill": "MATH HELPER",
-      "desc": "Memberi petunjuk jalur jika kamu bingung selama 5 detik.",
-      "icon": Icons.lightbulb_rounded
-    },
-    {
-      "name": "BOY",
-      "image": Icons.face_rounded,
-      "color": Colors.orange[400],
-      "skill": "QUICK SOLVER",
-      "desc": "Menambah jeda waktu berpikir AI sebanyak 1 detik.",
-      "icon": Icons.timer_rounded
-    },
-    {
-      "name": "GIRL",
-      "image": Icons.face_3_rounded,
-      "color": Colors.purple[400],
-      "skill": "POINT BOOSTER",
-      "desc": "Bonus +1 poin ekstra untuk setiap target HARD.",
-      "icon": Icons.stars_rounded
-    },
-  ];
-
-  // Data Frame Border
-  final List<Map<String, dynamic>> ownedBorders = [
-    {"name": "Classic Blue", "color": Colors.blue, "type": "flow"},
-    {"name": "Golden Royal", "color": Colors.amber, "type": "shimmer"},
-    {"name": "Toxic Matrix", "color": Colors.greenAccent[700]!, "type": "scan"},
-    {"name": "Neon Pulse", "color": Colors.pinkAccent, "type": "pulse"},
-    {"name": "Hellfire", "color": Colors.orangeAccent, "type": "fire"},
-    {"name": "Arctic Frost", "color": Colors.cyanAccent, "type": "crystal"},
-    {"name": "Void Nebula", "color": Colors.deepPurpleAccent, "type": "vortex"},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -93,11 +55,16 @@ class _InventoryPageState extends State<InventoryPage>
                       _buildHeader(),
                       _buildTabBar(),
                       Expanded(
-                        child: TabBarView(
-                          children: [
-                            _buildCharacterTab(),
-                            _buildBorderTab(),
-                          ],
+                        child: ListenableBuilder(
+                          listenable: ItemService(),
+                          builder: (context, child) {
+                            return TabBarView(
+                              children: [
+                                _buildCharacterTab(),
+                                _buildBorderTab(),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -160,6 +127,7 @@ class _InventoryPageState extends State<InventoryPage>
   }
 
   Widget _buildCharacterTab() {
+    final ownedCharacters = ItemService().ownedSkins;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: OrientationBuilder(
@@ -169,7 +137,7 @@ class _InventoryPageState extends State<InventoryPage>
           List<Widget> childrenList = ownedCharacters.asMap().entries.map((entry) {
             int idx = entry.key;
             var char = entry.value;
-            bool isSelected = activeCharacter == char['name'];
+            bool isSelected = activeCharacter == char.name;
             bool isHovered = hoveredCharIndex == idx;
 
             Widget card = MouseRegion(
@@ -183,7 +151,7 @@ class _InventoryPageState extends State<InventoryPage>
                     : Matrix4.identity(),
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.95), // Latar belakang putih transparan
+                  color: Colors.white.withOpacity(0.95), // Latar belakang putih transparan
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
                       color: isSelected
@@ -193,9 +161,9 @@ class _InventoryPageState extends State<InventoryPage>
                   boxShadow: [
                     BoxShadow(
                         color: isSelected
-                            ? Colors.orange.withValues(alpha: 0.5)
+                            ? Colors.orange.withOpacity(0.5)
                             : (isHovered
-                                ? Colors.blue.withValues(alpha: 0.3)
+                                ? Colors.blue.withOpacity(0.3)
                                 : Colors.black26),
                         blurRadius: isHovered ? 15 : 10,
                         offset: Offset(0, isHovered ? 8 : 5))
@@ -204,8 +172,8 @@ class _InventoryPageState extends State<InventoryPage>
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      activeCharacter = char['name'];
-                      GameConfig.selectedCharacter = char['name'];
+                      activeCharacter = char.name;
+                      GameConfig.selectedCharacter = char.name;
                     });
                   },
                   child: Column(
@@ -215,10 +183,10 @@ class _InventoryPageState extends State<InventoryPage>
                         child: Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                              color: char['color'],
+                              color: char.color,
                               borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(20))),
-                          child: Icon(char['image'],
+                          child: Icon(char.icon,
                               size: 70, color: Colors.white),
                         ),
                       ),
@@ -254,7 +222,7 @@ class _InventoryPageState extends State<InventoryPage>
     );
   }
 
-  Widget _buildCharacterInfo(Map<String, dynamic> char, bool isSelected) {
+  Widget _buildCharacterInfo(StoreItem char, bool isSelected) {
     return Expanded(
       flex: 6,
       child: Column(
@@ -263,7 +231,7 @@ class _InventoryPageState extends State<InventoryPage>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 8),
             color: const Color(0xFF0D47A1),
-            child: Text(char['name'],
+            child: Text(char.name,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     color: Colors.white,
@@ -276,18 +244,21 @@ class _InventoryPageState extends State<InventoryPage>
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    Icon(char['icon'], color: char['color'], size: 24),
-                    Text(char['skill'],
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: char['color'])),
+                    if (char.skillIcon != null)
+                      Icon(char.skillIcon, color: char.color, size: 24),
+                    if (char.skill != null)
+                      Text(char.skill!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: char.color)),
                     const SizedBox(height: 4),
-                    Text(char['desc'],
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 11, color: Colors.black87)),
+                    if (char.desc != null)
+                      Text(char.desc!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              fontSize: 11, color: Colors.black87)),
                   ],
                 ),
               ),
@@ -300,8 +271,8 @@ class _InventoryPageState extends State<InventoryPage>
               child: ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    activeCharacter = char['name'];
-                    GameConfig.selectedCharacter = char['name'];
+                    activeCharacter = char.name;
+                    GameConfig.selectedCharacter = char.name;
                   });
                 },
                 style: ElevatedButton.styleFrom(
@@ -320,6 +291,7 @@ class _InventoryPageState extends State<InventoryPage>
   }
 
   Widget _buildBorderTab() {
+    final ownedBorders = ItemService().ownedBorders;
     return GridView.builder(
       padding: const EdgeInsets.all(20),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -331,7 +303,7 @@ class _InventoryPageState extends State<InventoryPage>
       itemCount: ownedBorders.length,
       itemBuilder: (context, index) {
         final border = ownedBorders[index];
-        bool isSelected = activeBorder == border['color'];
+        bool isSelected = activeBorder == border.color;
         bool isHovered = hoveredBorderIndex == index;
 
         return MouseRegion(
@@ -343,9 +315,9 @@ class _InventoryPageState extends State<InventoryPage>
               return GestureDetector(
                 onTap: () {
                   setState(() {
-                    activeBorder = border['color'];
-                    GameConfig.selectedBorderColor = border['color'];
-                    GameConfig.selectedBorderType = border['type'];
+                    activeBorder = border.color;
+                    GameConfig.selectedBorderColor = border.color;
+                    GameConfig.selectedBorderType = border.borderType ?? "flow";
                   });
                 },
                 child: AnimatedContainer(
@@ -360,7 +332,7 @@ class _InventoryPageState extends State<InventoryPage>
                     boxShadow: [
                       if (isSelected || isHovered)
                         BoxShadow(
-                          color: border['color'].withValues(alpha: 0.5),
+                          color: border.color.withOpacity(0.5),
                           blurRadius: 20,
                           spreadRadius: 2,
                         )
@@ -371,9 +343,9 @@ class _InventoryPageState extends State<InventoryPage>
                       Positioned.fill(
                         child: CustomPaint(
                           painter: MLBorderPainter(
-                            color: border['color'],
+                            color: border.color,
                             progress: _animationController.value,
-                            type: border['type'],
+                            type: border.borderType ?? "flow",
                             isHovered: isHovered || isSelected,
                             borderRadius: 20.0,
                           ),
@@ -387,7 +359,7 @@ class _InventoryPageState extends State<InventoryPage>
                                   style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
-                                      color: border['color'])),
+                                      color: border.color)),
                             ),
                           ),
                           _buildBorderFooter(border, isSelected),
@@ -404,7 +376,7 @@ class _InventoryPageState extends State<InventoryPage>
     );
   }
 
-  Widget _buildBorderFooter(Map<String, dynamic> border, bool isSelected) {
+  Widget _buildBorderFooter(StoreItem border, bool isSelected) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(8),
@@ -414,7 +386,7 @@ class _InventoryPageState extends State<InventoryPage>
       ),
       child: Column(
         children: [
-          Text(border['name'],
+          Text(border.name,
               textAlign: TextAlign.center,
               style: const TextStyle(
                   color: Colors.white,
@@ -427,9 +399,9 @@ class _InventoryPageState extends State<InventoryPage>
             child: ElevatedButton(
               onPressed: () {
                 setState(() {
-                  activeBorder = border['color'];
-                  GameConfig.selectedBorderColor = border['color'];
-                  GameConfig.selectedBorderType = border['type'];
+                  activeBorder = border.color;
+                  GameConfig.selectedBorderColor = border.color;
+                  GameConfig.selectedBorderType = border.borderType ?? "flow";
                 });
               },
               style: ElevatedButton.styleFrom(

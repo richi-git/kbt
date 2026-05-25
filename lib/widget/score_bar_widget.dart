@@ -16,100 +16,112 @@ class ScoreBarWidget extends StatelessWidget {
     int flexUser = userScore > 0 ? userScore : 1;
     int flexAi = aiScore > 0 ? aiScore : 1;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(50),
-        border: Border.all(color: Colors.blue[200]!, width: 3),
-      ),
-      child: Row(
-        children: [
-          // Avatar YOU
-          Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(color: Colors.blue, width: 2),
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 800),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(color: Colors.blue[200]!, width: 3),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: CircleAvatar(
-              radius: 24,
-              backgroundColor: Colors.blue[100],
-              child: Icon(Icons.face_rounded, color: Colors.blue[800], size: 36),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            "YOU",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: Colors.blue[800],
-            ),
-          ),
-          const SizedBox(width: 16),
-          
-          // Progress Bar
-          Expanded(
-            child: Container(
-              height: 20,
+          ],
+        ),
+        child: Row(
+          children: [
+            // Avatar YOU
+            Container(
+              padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey[200], // Latar belakang bar
+                shape: BoxShape.circle,
+                color: Colors.white,
+                border: Border.all(color: Colors.blue, width: 2),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: flexUser,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue[600],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4), // Celah kecil di tengah
-                  Expanded(
-                    flex: flexAi,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.red[600],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ],
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.blue[100],
+                child:
+                    Icon(Icons.face_rounded, color: Colors.blue[800], size: 28),
               ),
             ),
-          ),
-          
-          const SizedBox(width: 16),
-          Text(
-            "AI",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: Colors.red[600],
+            const SizedBox(width: 12),
+            Text(
+              "YOU",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: Colors.blue[800],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          
-          // Avatar AI
-          Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(color: Colors.red, width: 2),
+            const SizedBox(width: 16),
+
+            // Progress Bar
+            Expanded(
+              child: Container(
+                height: 18,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey[200], // Latar belakang bar
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: flexUser,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue[600],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4), // Celah kecil di tengah
+                    Expanded(
+                      flex: flexAi,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.red[600],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            child: CircleAvatar(
-              radius: 24,
-              backgroundColor: Colors.red[100],
-              child: Icon(Icons.smart_toy_rounded, color: Colors.red[800], size: 32),
+
+            const SizedBox(width: 16),
+            Text(
+              "AI",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: Colors.red[600],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+
+            // Avatar AI
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                border: Border.all(color: Colors.red, width: 2),
+              ),
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.red[100],
+                child: Icon(Icons.smart_toy_rounded,
+                    color: Colors.red[800], size: 26),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

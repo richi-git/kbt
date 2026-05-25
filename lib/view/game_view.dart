@@ -38,8 +38,8 @@ class _GameViewState extends State<GameView>
   List<int> activeDeliveryRoute = [];
 
   // LOGIKA TARIK TAMBANG: Total 50 poin
-  int userScore = 10;
-  int aiScore = 40;
+  int userScore = 25;
+  int aiScore = 25;
   String currentCalculationResult = "";
 
   Timer? _timer;
@@ -392,8 +392,8 @@ class _GameViewState extends State<GameView>
                             },
                             onRestart: () {
                               setState(() {
-                                userScore = 10;
-                                aiScore = 40;
+                                userScore = 25;
+                                aiScore = 25;
                                 currentCalculationResult = "";
                                 activeDeliveryRoute.clear();
                                 _initRandomInventory();

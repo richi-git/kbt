@@ -5,6 +5,7 @@ enum ItemType { skin, border }
 class StoreItem {
   final String name;
   final IconData? icon;
+  final String? imagePath; // Specific for images
   final Color color;
   final int price;
   bool isOwned;
@@ -17,6 +18,7 @@ class StoreItem {
   StoreItem({
     required this.name,
     this.icon,
+    this.imagePath,
     required this.color,
     required this.price,
     this.isOwned = false,
@@ -37,6 +39,7 @@ class ItemService extends ChangeNotifier {
       // SKINS
       StoreItem(
         name: "BUBU",
+        imagePath: "assets/chara_bubu.png",
         icon: Icons.smart_toy,
         color: Colors.blue[400]!,
         price: 0,
@@ -48,6 +51,7 @@ class ItemService extends ChangeNotifier {
       ),
       StoreItem(
         name: "BOY",
+        imagePath: "assets/boy_char.png",
         icon: Icons.face_rounded,
         color: Colors.orange[400]!,
         price: 1000,
@@ -59,6 +63,7 @@ class ItemService extends ChangeNotifier {
       ),
       StoreItem(
         name: "GIRL",
+        imagePath: "assets/girl_char.png",
         icon: Icons.face_3_rounded,
         color: Colors.purple[400]!,
         price: 1000,
@@ -68,29 +73,41 @@ class ItemService extends ChangeNotifier {
         desc: "Bonus +1 poin ekstra untuk setiap target HARD.",
         skillIcon: Icons.stars_rounded,
       ),
-       StoreItem(
+      StoreItem(
         name: "PIRATE BUBU",
-        icon: Icons.smart_toy,
-        color: Colors.red[400]!,
+        imagePath: "assets/chara_piratebubu.png",
+        icon: Icons.sailing_rounded,
+        color: Colors.red[700]!,
         price: 500,
         isOwned: false,
         type: ItemType.skin,
+        skill: "TREASURE HUNTER",
+        desc: "Mendapatkan bonus +50 koin tambahan setiap kali memenangkan level HARD.",
+        skillIcon: Icons.monetization_on_rounded,
       ),
       StoreItem(
         name: "NINJA BOY",
-        icon: Icons.face_rounded,
-        color: Colors.black87,
+        imagePath: "assets/chara_ninjaboy.png",
+        icon: Icons.visibility_off_rounded,
+        color: Colors.grey[900]!,
         price: 800,
         isOwned: false,
         type: ItemType.skin,
+        skill: "SHADOW STRIKE",
+        desc: "Mengurangi target angka AI sebanyak 1 poin di awal permainan.",
+        skillIcon: Icons.flash_on_rounded,
       ),
       StoreItem(
         name: "PRINCESS GIRL",
-        icon: Icons.face_3_rounded,
+        imagePath: "assets/chara_princessgirl.png",
+        icon: Icons.auto_awesome_rounded,
         color: Colors.pink[300]!,
         price: 800,
         isOwned: false,
         type: ItemType.skin,
+        skill: "ROYAL SHIELD",
+        desc: "Memberikan 1x kesempatan salah jawab tanpa mengurangi poin per level.",
+        skillIcon: Icons.shield_rounded,
       ),
       StoreItem(
         name: "CYBORG BUBU",

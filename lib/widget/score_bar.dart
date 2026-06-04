@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:praktikum_1/service/item_service.dart';
+import 'package:praktikum_1/config/game_config.dart';
 
 class ScoreBarWidget extends StatelessWidget {
   final int userScore;
@@ -15,13 +17,36 @@ class ScoreBarWidget extends StatelessWidget {
     int flexUser = userScore > 0 ? userScore : 1;
     int flexAi = aiScore > 0 ? aiScore : 1;
 
+    // Ambil data karakter terpilih
+    final selectedCharName = GameConfig.selectedCharacter;
+    final allSkins = ItemService().skins;
+    final selectedChar = allSkins.firstWhere(
+      (char) => char.name == selectedCharName,
+      orElse: () => allSkins.first,
+    );
+
     return Row(
       children: [
         // Avatar Pemain
-        const CircleAvatar(
+        CircleAvatar(
           radius: 24,
-          backgroundColor: Colors.blueAccent,
-          child: Icon(Icons.person, color: Colors.white, size: 30),
+          backgroundColor: selectedChar.color,
+          child: selectedChar.imagePath != null
+              ? ClipOval(
+                  child: OverflowBox(
+                    maxHeight: 150, // Extreme height for coverage
+                    maxWidth: 150,
+                    alignment: const Alignment(0, -0.6), // Focus on face
+                    child: Image.asset(
+                      selectedChar.imagePath!,
+                      fit: BoxFit.cover, // Fill the entire area
+                      filterQuality: FilterQuality.high,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(selectedChar.icon, color: Colors.white, size: 30),
+                    ),
+                  ),
+                )
+              : Icon(selectedChar.icon, color: Colors.white, size: 30),
         ),
         const SizedBox(width: 12),
 

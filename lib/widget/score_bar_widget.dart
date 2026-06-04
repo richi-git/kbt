@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:praktikum_1/service/item_service.dart';
+import 'package:praktikum_1/config/game_config.dart';
 
 class ScoreBarWidget extends StatelessWidget {
   final int userScore;
@@ -15,6 +17,14 @@ class ScoreBarWidget extends StatelessWidget {
     // Mencegah error bottleneck jika skor 0
     int flexUser = userScore > 0 ? userScore : 1;
     int flexAi = aiScore > 0 ? aiScore : 1;
+
+    // Ambil data karakter terpilih
+    final selectedCharName = GameConfig.selectedCharacter;
+    final allSkins = ItemService().skins;
+    final selectedChar = allSkins.firstWhere(
+      (char) => char.name == selectedCharName,
+      orElse: () => allSkins.first,
+    );
 
     return Center(
       child: Container(
@@ -40,13 +50,30 @@ class ScoreBarWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
-                border: Border.all(color: Colors.blue, width: 2),
+                border: Border.all(color: selectedChar.color, width: 2),
               ),
               child: CircleAvatar(
                 radius: 20,
-                backgroundColor: Colors.blue[100],
-                child:
-                    Icon(Icons.face_rounded, color: Colors.blue[800], size: 28),
+                backgroundColor: selectedChar.color.withOpacity(0.2),
+                child: selectedChar.imagePath != null
+                    ? ClipOval(
+                        child: OverflowBox(
+                          maxHeight: 120, // Extreme height for coverage
+                          maxWidth: 120,
+                          alignment: const Alignment(0, -0.6), // Focus on face
+                          child: Image.asset(
+                            selectedChar.imagePath!,
+                            fit: BoxFit.cover, // Fill the entire area
+                            filterQuality: FilterQuality.high,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                                selectedChar.icon,
+                                color: selectedChar.color,
+                                size: 28),
+                          ),
+                        ),
+                      )
+                    : Icon(selectedChar.icon,
+                        color: selectedChar.color, size: 28),
               ),
             ),
             const SizedBox(width: 12),

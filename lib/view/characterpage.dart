@@ -229,13 +229,19 @@ class _CharacterCardState extends State<_CharacterCard> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.2),
-                            ),
-                            child:
-                                Icon(char.icon, size: 60, color: Colors.white),
+                            padding: const EdgeInsets.all(0), // Removed padding to maximize space
+                            child: char.imagePath != null
+                                ? Image.asset(
+                                    char.imagePath!,
+                                    height: 280, // Significantly increased from 180
+                                    fit: BoxFit.contain,
+                                    filterQuality: FilterQuality.high,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Icon(char.icon,
+                                            size: 80, color: Colors.white),
+                                  )
+                                : Icon(char.icon,
+                                    size: 80, color: Colors.white),
                           ),
                         ],
                       ),

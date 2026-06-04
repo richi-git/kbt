@@ -186,8 +186,24 @@ class _InventoryPageState extends State<InventoryPage>
                               color: char.color,
                               borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(20))),
-                          child: Icon(char.icon,
-                              size: 70, color: Colors.white),
+                          child: char.imagePath != null
+                              ? ClipRect(
+                                  child: OverflowBox(
+                                    maxHeight: 240, // 2x zoom (120 * 2)
+                                    alignment: Alignment.topCenter,
+                                    child: Image.asset(
+                                      char.imagePath!,
+                                      fit: BoxFit.contain,
+                                      filterQuality: FilterQuality.high,
+                                      errorBuilder:
+                                          (context, error, stackTrace) => Icon(
+                                              char.icon,
+                                              size: 70,
+                                              color: Colors.white),
+                                    ),
+                                  ),
+                                )
+                              : Icon(char.icon, size: 70, color: Colors.white),
                         ),
                       ),
                       _buildCharacterInfo(char, isSelected),

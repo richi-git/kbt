@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:praktikum_1/view/adventurepage.dart';
 import 'package:praktikum_1/widget/math_background.dart';
+import 'package:praktikum_1/config/game_config.dart';
+import 'package:praktikum_1/service/item_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -59,49 +61,23 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
 
-                              // MAIN BANNER
+                              // ACTION CARDS (PLAY, LATIHAN, ADVENTURE) - Always Column as requested
                               Flexible(
-                                flex: 3,
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      minWidth: 400,
-                                      maxWidth: 600,
-                                    ),
-                                    child:
-                                        _buildMainBanner(context, isLandscape),
-                                  ),
-                                ),
-                              ),
-
-                              // ACTION CARDS
-                              Flexible(
-                                flex: 2,
+                                flex: 6,
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
                                   child: SizedBox(
-                                    width: isLandscape ? 800 : 400,
-                                    child: isLandscape
-                                        ? SizedBox(
-                                            height: 120,
-                                            child: Row(
-                                              children: [
-                                                Expanded(child: _buildLatihanCard()),
-                                                const SizedBox(width: 20),
-                                                Expanded(
-                                                    child: _buildAdventureCard(context)),
-                                              ],
-                                            ),
-                                          )
-                                        : Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              _buildLatihanCard(),
-                                              const SizedBox(height: 16),
-                                              _buildAdventureCard(context),
-                                            ],
-                                          ),
+                                    width: isLandscape ? 450 : 380, // Reduced width for tighter look
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _buildPlayCard(context, isLandscape),
+                                        const SizedBox(height: 16),
+                                        _buildLatihanCard(isLandscape),
+                                        const SizedBox(height: 16),
+                                        _buildAdventureCard(context, isLandscape),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -309,199 +285,113 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMainBanner(BuildContext context, bool isLandscape) {
-    Widget content = Row(
-      children: [
-        // Mascot Icon Placeholder (Composed to look like the image)
-        Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: isLandscape ? 140 : 100,
-              height: isLandscape ? 140 : 100,
-              decoration: BoxDecoration(
-                color: const Color(0xFF60A5FA), // Light blue skin
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 4),
-                boxShadow: const [
-                  BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 6),
-                      blurRadius: 6)
-                ],
-              ),
-              child: Icon(Icons.face_rounded,
-                  size: isLandscape ? 100 : 70, color: Colors.white),
-            ),
-            // Hat placeholder
-            Positioned(
-              top: -10,
-              left: 10,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border:
-                        Border.all(color: const Color(0xFF1E3A8A), width: 3)),
-                child: Icon(Icons.star_rounded,
-                    color: const Color(0xFF60A5FA),
-                    size: isLandscape ? 24 : 18),
-              ),
-            ),
-            // Red "MATH" book in hand
-            Positioned(
-              bottom: -10,
-              right: -10,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDC2626), // Red book
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white, width: 3),
-                  boxShadow: const [
-                    BoxShadow(
-                        color: Colors.black45,
-                        offset: Offset(0, 4),
-                        blurRadius: 4)
-                  ],
-                ),
-                child: Text("MATH",
-                    style: TextStyle(
-                        color: Colors.yellow,
-                        fontWeight: FontWeight.w900,
-                        fontSize: isLandscape ? 14 : 10)),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(width: isLandscape ? 32 : 16),
-
-        // Texts and PLAY Button
-        Expanded(
-          child: Column(
-            crossAxisAlignment: isLandscape
-                ? CrossAxisAlignment.center
-                : CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Welcome!",
-                style: TextStyle(
-                  fontSize: isLandscape ? 42 : 28,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  shadows: const [
-                    Shadow(color: Colors.black26, offset: Offset(2, 2))
-                  ],
-                ),
-              ),
-              Text(
-                "Let's play and learn!",
-                style: TextStyle(
-                  fontSize: isLandscape ? 20 : 14,
-                  color: const Color(0xFFFDE047), // Kuning
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Play Button
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AdventurePage()),
-                  );
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: double.infinity,
-                  height: isLandscape ? 70 : 50,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF86EFAC),
-                        Color(0xFF22C55E)
-                      ], // Hijau cerah ke hijau
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                    borderRadius: BorderRadius.circular(35),
-                    border: Border.all(color: Colors.white, width: 4),
-                    boxShadow: [
-                      BoxShadow(
-                          color: const Color(0xFF166534),
-                          offset: Offset(
-                              0,
-                              isHoveredPlay
-                                  ? 4
-                                  : 8)), // 3D effect changes on hover
-                      BoxShadow(
-                          color: Colors.black38,
-                          offset: Offset(0, isHoveredPlay ? 8 : 12),
-                          blurRadius: 8),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    "PLAY",
-                    style: TextStyle(
-                      fontSize: isLandscape ? 36 : 24,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 2,
-                      shadows: const [
-                        Shadow(
-                            color: Colors.black26,
-                            offset: Offset(1, 2),
-                            blurRadius: 2)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+  Widget _buildPlayCard(BuildContext context, bool isLandscape) {
+    // Ambil data karakter terpilih
+    final selectedCharName = GameConfig.selectedCharacter;
+    final allSkins = ItemService().skins;
+    final selectedChar = allSkins.firstWhere(
+      (char) => char.name == selectedCharName,
+      orElse: () => allSkins.first,
     );
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHoveredPlay = true),
       onExit: (_) => setState(() => isHoveredPlay = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        transform: isHoveredPlay
-            ? (Matrix4.diagonal3Values(1.02, 1.02, 1.0))
-            : Matrix4.identity(),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1D4ED8), // Biru vivid
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(
-              color: isHoveredPlay ? Colors.yellowAccent : Colors.white,
-              width: 5),
-          boxShadow: [
-            BoxShadow(
-                color: isHoveredPlay
-                    ? Colors.blue.withValues(alpha: 0.5)
-                    : Colors.black38,
-                offset: Offset(0, isHoveredPlay ? 15 : 10),
-                blurRadius: isHoveredPlay ? 20 : 10)
-          ],
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AdventurePage()),
+          );
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          transform: isHoveredPlay
+              ? (Matrix4.diagonal3Values(1.05, 1.05, 1.0))
+              : Matrix4.identity(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)], // Gradasi biru
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+                color: isHoveredPlay ? Colors.yellowAccent : Colors.white,
+                width: 4),
+            boxShadow: [
+              BoxShadow(
+                  color: isHoveredPlay
+                      ? Colors.blue.withValues(alpha: 0.5)
+                      : Colors.black38,
+                  offset: Offset(0, isHoveredPlay ? 10 : 6),
+                  blurRadius: isHoveredPlay ? 12 : 6)
+            ],
+          ),
+          child: Row(
+            children: [
+              // Mascot Icon in Circle (Same size as other cards)
+              Container(
+                width: 70,
+                height: 70,
+                decoration: const BoxDecoration(
+                    color: Colors.white, shape: BoxShape.circle),
+                child: ClipOval(
+                  child: selectedChar.imagePath != null
+                      ? Image.asset(
+                          selectedChar.imagePath!,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                              selectedChar.icon,
+                              size: 45,
+                              color: selectedChar.color),
+                        )
+                      : Icon(selectedChar.icon,
+                          size: 45, color: selectedChar.color),
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "PLAY",
+                      style: TextStyle(
+                        fontSize: 26, // Increased from 22
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(color: Colors.black26, offset: Offset(1, 1))
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      "Selamat Datang!\nAyo mulai bermain.",
+                      style: TextStyle(
+                        fontSize: 14, // Increased from 12
+                        color: Color(0xFFBFDBFE), // Biru muda
+                        fontWeight: FontWeight.w900,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        child: content,
       ),
     );
   }
 
-  Widget _buildLatihanCard() {
+  Widget _buildLatihanCard(bool isLandscape) {
     return MouseRegion(
       onEnter: (_) => setState(() => isHoveredLatihan = true),
       onExit: (_) => setState(() => isHoveredLatihan = false),
@@ -590,7 +480,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     "LATIHAN",
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 26, // Increased from 22
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                       shadows: [
@@ -602,7 +492,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     "Asah kemampuan\nmatematika kamu!",
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 14, // Increased from 12
                       color: Color(0xFF78350F), // Coklat gelap
                       fontWeight: FontWeight.w900,
                       height: 1.1,
@@ -617,7 +507,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildAdventureCard(BuildContext context) {
+  Widget _buildAdventureCard(BuildContext context, bool isLandscape) {
     return MouseRegion(
       onEnter: (_) => setState(() => isHoveredAdventure = true),
       onExit: (_) => setState(() => isHoveredAdventure = false),
@@ -688,7 +578,7 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       "ADVENTURE",
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 26, // Increased from 22
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
                         shadows: [
@@ -700,7 +590,7 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       "Jelajahi dunia\ndan selesaikan misi!",
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 14, // Increased from 12
                         color: Color(0xFF4C1D95), // Ungu gelap
                         fontWeight: FontWeight.w900,
                         height: 1.1,

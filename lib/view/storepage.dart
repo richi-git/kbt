@@ -65,8 +65,10 @@ class _StorePageState extends State<StorePage> {
                           builder: (context, child) {
                             return TabBarView(
                               children: [
-                                _buildGridContent(ItemService().skins, isSkin: true),
-                                _buildGridContent(ItemService().borders, isSkin: false),
+                                _buildGridContent(ItemService().skins,
+                                    isSkin: true),
+                                _buildGridContent(ItemService().borders,
+                                    isSkin: false),
                               ],
                             );
                           },
@@ -138,7 +140,9 @@ class _StorePageState extends State<StorePage> {
                 border: Border.all(color: Colors.yellow[200]!, width: 2),
                 boxShadow: const [
                   BoxShadow(
-                      color: Colors.black26, offset: Offset(0, 3), blurRadius: 4)
+                      color: Colors.black26,
+                      offset: Offset(0, 3),
+                      blurRadius: 4)
                 ],
               ),
               child: Row(
@@ -159,7 +163,8 @@ class _StorePageState extends State<StorePage> {
                     },
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.add_circle_outline_rounded, color: Colors.white, size: 20),
+                  const Icon(Icons.add_circle_outline_rounded,
+                      color: Colors.white, size: 20),
                 ],
               ),
             ),
@@ -170,8 +175,7 @@ class _StorePageState extends State<StorePage> {
   }
 
   // --- WIDGET GRID UNTUK ITEM ---
-  Widget _buildGridContent(List<StoreItem> items,
-      {required bool isSkin}) {
+  Widget _buildGridContent(List<StoreItem> items, {required bool isSkin}) {
     return Center(
       child: GridView.builder(
         shrinkWrap: true,
@@ -228,13 +232,11 @@ class _StoreCardState extends State<_StoreCard> {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.95),
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-              color: isHovered ? Colors.blue : item.color, width: 4),
+          border:
+              Border.all(color: isHovered ? Colors.blue : item.color, width: 4),
           boxShadow: [
             BoxShadow(
-                color: isHovered
-                    ? item.color.withOpacity(0.4)
-                    : Colors.black26,
+                color: isHovered ? item.color.withOpacity(0.4) : Colors.black26,
                 blurRadius: isHovered ? 15 : 8,
                 offset: Offset(0, isHovered ? 8 : 4))
           ],
@@ -251,7 +253,24 @@ class _StoreCardState extends State<_StoreCard> {
                       const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: isSkin
-                    ? Icon(item.icon, size: 80, color: item.color)
+                    ? (item.imagePath != null
+                        ? Center(
+                            child: ClipRect(
+                              child: OverflowBox(
+                                maxHeight: 180, // 2x zoom (90 * 2)
+                                alignment: Alignment.topCenter,
+                                child: Image.asset(
+                                  item.imagePath!,
+                                  fit: BoxFit.contain,
+                                  filterQuality: FilterQuality.high,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Icon(item.icon,
+                                          size: 80, color: item.color),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Icon(item.icon, size: 80, color: item.color))
                     : Center(
                         // Preview untuk Border
                         child: Container(
@@ -347,7 +366,8 @@ class _StoreCardState extends State<_StoreCard> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: item.isOwned ? Colors.grey[400] : Colors.green,
+                        backgroundColor:
+                            item.isOwned ? Colors.grey[400] : Colors.green,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                         padding: EdgeInsets.zero,

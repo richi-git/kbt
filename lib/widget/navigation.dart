@@ -34,10 +34,16 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_currentIndex],
-      extendBody: true,
-      bottomNavigationBar: SizedBox(
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapDown: (_) {
+        // Trigger BGM on first interaction for Web Autoplay policy
+        AudioService.playBGM();
+      },
+      child: Scaffold(
+        body: _pages[_currentIndex],
+        extendBody: true,
+        bottomNavigationBar: SizedBox(
         height: 120, // Tentukan tinggi agar tidak menutupi seluruh layar
         child: Align(
           alignment: Alignment.bottomCenter,

@@ -49,26 +49,24 @@ class AudioService {
 
   // BGM
   static final AudioPlayer _bgmPlayer = AudioPlayer();
-  static bool _isBGMPlaying = false;
 
   static Future<void> playBGM() async {
-    if (_isBGMPlaying) return;
+    // Jika sudah main, jangan mulai lagi
+    if (_bgmPlayer.state == PlayerState.playing) return;
+    
     try {
-      _isBGMPlaying = true;
       await _bgmPlayer.stop();
       await _bgmPlayer.setSource(AssetSource('audio/bgm_mathlink.mp3'));
       await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
       await _bgmPlayer.setVolume(GameConfig.volume);
       await _bgmPlayer.resume();
     } catch (e) {
-      _isBGMPlaying = false;
       print("Error playing BGM: $e. Make sure assets/audio/bgm_mathlink.mp3 exists.");
     }
   }
 
   static Future<void> stopBGM() async {
     await _bgmPlayer.stop();
-    _isBGMPlaying = false;
   }
 
   static Future<void> toggleBGM(bool play) async {

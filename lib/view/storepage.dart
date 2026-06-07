@@ -3,6 +3,7 @@ import 'package:praktikum_1/service/currency_service.dart';
 import 'package:praktikum_1/service/item_service.dart';
 import 'package:praktikum_1/view/topup_page.dart';
 import 'package:praktikum_1/widget/math_background.dart';
+import 'package:praktikum_1/service/language_service.dart';
 
 class StorePage extends StatefulWidget {
   const StorePage({super.key});
@@ -12,6 +13,10 @@ class StorePage extends StatefulWidget {
 }
 
 class _StorePageState extends State<StorePage> {
+  final LanguageService _lang = LanguageService();
+
+  String _t(String key) => _lang.translate('store', key);
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -28,6 +33,9 @@ class _StorePageState extends State<StorePage> {
                     children: [
                       // === HEADER & COIN ===
                       _buildHeader(context),
+
+                      // === PREMIUM PROMO ===
+                      _buildPremiumPromo(context),
 
                       // === TAB BAR KATEGORI ===
                       Container(
@@ -51,9 +59,9 @@ class _StorePageState extends State<StorePage> {
                           indicatorSize: TabBarIndicatorSize.tab,
                           dividerColor: Colors
                               .transparent, // Hilangkan garis bawah default
-                          tabs: const [
-                            Tab(text: "SKIN KARAKTER"),
-                            Tab(text: "FRAME BORDER"),
+                          tabs: [
+                            Tab(text: _t('tab_skin')),
+                            Tab(text: _t('tab_border')),
                           ],
                         ),
                       ),
@@ -102,12 +110,12 @@ class _StorePageState extends State<StorePage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Judul Header
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "STORE",
-                style: TextStyle(
+                _t('title'),
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
@@ -115,8 +123,8 @@ class _StorePageState extends State<StorePage> {
                 ),
               ),
               Text(
-                "Kustomisasi permainanmu!",
-                style: TextStyle(
+                _t('subtitle'),
+                style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
                     fontWeight: FontWeight.bold),
@@ -198,6 +206,70 @@ class _StorePageState extends State<StorePage> {
       ),
     );
   }
+
+  Widget _buildPremiumPromo(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: CurrencyService().premiumListenable,
+      builder: (context, isPremium, child) {
+        if (isPremium) return const SizedBox.shrink();
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TopUpPage()),
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Colors.purple, Colors.blue],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.purple.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.workspace_premium_rounded,
+                    color: Colors.white, size: 32),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _t('premium_title'),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14),
+                      ),
+                      Text(
+                        _t('premium_subtitle'),
+                        style: const TextStyle(color: Colors.white70, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded,
+                    color: Colors.white, size: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _StoreCard extends StatefulWidget {
@@ -219,6 +291,7 @@ class _StoreCardState extends State<_StoreCard> {
   Widget build(BuildContext context) {
     final item = widget.item;
     final isSkin = widget.isSkin;
+    final LanguageService _lang = LanguageService();
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
@@ -327,9 +400,9 @@ class _StoreCardState extends State<_StoreCard> {
                       ],
                     )
                   else
-                    const Text(
-                      "DIMILIKI",
-                      style: TextStyle(
+                    Text(
+                      _lang.translate('store', 'owned'),
+                      style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                           color: Colors.green),
@@ -351,14 +424,14 @@ class _StoreCardState extends State<_StoreCard> {
                             ItemService().purchaseItem(item.name);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text("Berhasil membeli ${item.name}!"),
+                                content: Text("${_lang.translate('store', 'buy_success')}${item.name}!"),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Koin tidak cukup!"),
+                              SnackBar(
+                                content: Text(_lang.translate('store', 'no_money')),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -373,7 +446,7 @@ class _StoreCardState extends State<_StoreCard> {
                         padding: EdgeInsets.zero,
                       ),
                       child: Text(
-                        item.isOwned ? "DIMILIKI" : "BELI",
+                        item.isOwned ? _lang.translate('store', 'owned') : _lang.translate('store', 'buy'),
                         style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,

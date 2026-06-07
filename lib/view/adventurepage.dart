@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:praktikum_1/config/game_config.dart';
 import 'package:praktikum_1/view/game_view.dart';
 import 'package:praktikum_1/widget/math_background.dart';
+import 'package:praktikum_1/service/language_service.dart';
 
 class AdventurePage extends StatefulWidget {
   const AdventurePage({super.key});
@@ -12,6 +13,9 @@ class AdventurePage extends StatefulWidget {
 
 class _AdventurePageState extends State<AdventurePage> {
   int? hoveredLevel;
+  final LanguageService _lang = LanguageService();
+
+  String _t(String key) => _lang.translate('adventure', key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +41,7 @@ class _AdventurePageState extends State<AdventurePage> {
                           children: [
                             _buildLevelCard(
                                 level: 4,
-                                title: "CITY",
+                                title: _t('city'),
                                 gradientColors: [
                                   const Color(0xFF9333EA),
                                   const Color(0xFF6B21A8)
@@ -46,7 +50,7 @@ class _AdventurePageState extends State<AdventurePage> {
                             _buildDottedLine(),
                             _buildLevelCard(
                                 level: 3,
-                                title: "VILLAGE",
+                                title: _t('village'),
                                 gradientColors: [
                                   const Color(0xFF4ADE80),
                                   const Color(0xFF16A34A)
@@ -55,7 +59,7 @@ class _AdventurePageState extends State<AdventurePage> {
                             _buildDottedLine(),
                             _buildLevelCard(
                                 level: 2,
-                                title: "BEACH",
+                                title: _t('beach'),
                                 gradientColors: [
                                   const Color(0xFFFBBF24),
                                   const Color(0xFFB45309)
@@ -64,7 +68,7 @@ class _AdventurePageState extends State<AdventurePage> {
                             _buildDottedLine(),
                             _buildLevelCard(
                                 level: 1,
-                                title: "OCEAN",
+                                title: _t('ocean'),
                                 gradientColors: [
                                   const Color(0xFF38BDF8),
                                   const Color(0xFF1D4ED8)
@@ -111,7 +115,7 @@ class _AdventurePageState extends State<AdventurePage> {
             child: Stack(
               children: [
                 Text(
-                  "ADVENTURE",
+                  _t('title'),
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
@@ -122,9 +126,9 @@ class _AdventurePageState extends State<AdventurePage> {
                       ..color = const Color(0xFF1E3A8A), // Dark blue outline
                   ),
                 ),
-                const Text(
-                  "ADVENTURE",
-                  style: TextStyle(
+                Text(
+                  _t('title'),
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 2,
@@ -173,7 +177,7 @@ class _AdventurePageState extends State<AdventurePage> {
           width: 8,
           height: 8,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: Colors.white.withOpacity(0.8),
             shape: BoxShape.circle,
             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 2)],
           ),
@@ -218,7 +222,7 @@ class _AdventurePageState extends State<AdventurePage> {
                         image: AssetImage(bgImage),
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
-                            Colors.black.withValues(alpha: 0.3), BlendMode.darken),
+                            Colors.black.withOpacity(0.3), BlendMode.darken),
                       )
                     : null,
                 borderRadius: BorderRadius.circular(55),
@@ -280,7 +284,7 @@ class _AdventurePageState extends State<AdventurePage> {
                           boxShadow: const [BoxShadow(color: Colors.black26, offset: Offset(0, 4))],
                         ),
                         child: Text(
-                          isCurrentLevel ? "PLAY" : (isDone ? "DONE" : "LOCKED"),
+                          isCurrentLevel ? _t('play') : (isDone ? _t('done') : _t('locked')),
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                       ),

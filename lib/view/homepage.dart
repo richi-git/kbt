@@ -3,6 +3,9 @@ import 'package:praktikum_1/view/adventurepage.dart';
 import 'package:praktikum_1/widget/math_background.dart';
 import 'package:praktikum_1/config/game_config.dart';
 import 'package:praktikum_1/service/item_service.dart';
+import 'package:praktikum_1/view/leaderboard_page.dart';
+import 'package:praktikum_1/view/setting_user.dart';
+import 'package:praktikum_1/service/language_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,6 +18,9 @@ class _HomePageState extends State<HomePage> {
   bool isHoveredPlay = false;
   bool isHoveredLatihan = false;
   bool isHoveredAdventure = false;
+  final LanguageService _lang = LanguageService();
+
+  String _t(String key) => _lang.translate('homepage', key);
 
   @override
   Widget build(BuildContext context) {
@@ -100,50 +106,68 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildSettingsIcon() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2563EB), // Biru
-        shape: BoxShape.circle,
-        border: Border.all(
-            color: const Color(0xFF60A5FA), width: 3), // Border biru muda
-        boxShadow: const [
-          BoxShadow(color: Colors.black38, offset: Offset(0, 4), blurRadius: 4)
-        ],
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SettingsPage()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2563EB), // Biru
+          shape: BoxShape.circle,
+          border: Border.all(
+              color: const Color(0xFF60A5FA), width: 3), // Border biru muda
+          boxShadow: const [
+            BoxShadow(color: Colors.black38, offset: Offset(0, 4), blurRadius: 4)
+          ],
+        ),
+        child: const Icon(Icons.settings_rounded, color: Colors.white, size: 36),
       ),
-      child: const Icon(Icons.settings_rounded, color: Colors.white, size: 36),
     );
   }
 
   Widget _buildLeaderboardButton() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)], // Gradasi biru
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white, width: 3),
-        boxShadow: const [
-          BoxShadow(color: Colors.black38, offset: Offset(0, 4), blurRadius: 4)
-        ],
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.emoji_events_rounded, color: Color(0xFFFBBF24), size: 28),
-          SizedBox(width: 8),
-          Text(
-            "LEADERBOARD",
-            style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
-                letterSpacing: 1),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LeaderboardPage()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)], // Gradasi biru
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-        ],
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white, width: 3),
+          boxShadow: const [
+            BoxShadow(color: Colors.black38, offset: Offset(0, 4), blurRadius: 4)
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.emoji_events_rounded, color: Color(0xFFFBBF24), size: 28),
+            const SizedBox(width: 8),
+            Text(
+              _t('leaderboard'),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                  letterSpacing: 1),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -355,14 +379,14 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(width: 16),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "PLAY",
-                      style: TextStyle(
+                      _t('play'),
+                      style: const TextStyle(
                         fontSize: 26, // Increased from 22
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
@@ -371,10 +395,10 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      "Selamat Datang!\nAyo mulai bermain.",
-                      style: TextStyle(
+                      _t('play_subtitle'),
+                      style: const TextStyle(
                         fontSize: 14, // Increased from 12
                         color: Color(0xFFBFDBFE), // Biru muda
                         fontWeight: FontWeight.w900,
@@ -472,14 +496,14 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "LATIHAN",
-                    style: TextStyle(
+                    _t('practice'),
+                    style: const TextStyle(
                       fontSize: 26, // Increased from 22
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
@@ -488,10 +512,10 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    "Asah kemampuan\nmatematika kamu!",
-                    style: TextStyle(
+                    _t('practice_subtitle'),
+                    style: const TextStyle(
                       fontSize: 14, // Increased from 12
                       color: Color(0xFF78350F), // Coklat gelap
                       fontWeight: FontWeight.w900,
@@ -570,14 +594,14 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(width: 16),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "ADVENTURE",
-                      style: TextStyle(
+                      _t('adventure'),
+                      style: const TextStyle(
                         fontSize: 26, // Increased from 22
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
@@ -586,10 +610,10 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      "Jelajahi dunia\ndan selesaikan misi!",
-                      style: TextStyle(
+                      _t('adventure_subtitle'),
+                      style: const TextStyle(
                         fontSize: 14, // Increased from 12
                         color: Color(0xFF4C1D95), // Ungu gelap
                         fontWeight: FontWeight.w900,

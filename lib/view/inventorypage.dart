@@ -3,6 +3,7 @@ import 'package:praktikum_1/config/game_config.dart';
 import 'package:praktikum_1/service/item_service.dart';
 import 'package:praktikum_1/widget/math_background.dart';
 import 'package:praktikum_1/widget/animated_border_painter.dart';
+import 'package:praktikum_1/service/language_service.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -17,6 +18,7 @@ class _InventoryPageState extends State<InventoryPage>
   late Color activeBorder;
   int? hoveredCharIndex;
   int? hoveredBorderIndex;
+  final LanguageService _lang = LanguageService();
 
   late AnimationController _animationController;
 
@@ -37,6 +39,8 @@ class _InventoryPageState extends State<InventoryPage>
     _animationController.dispose();
     super.dispose();
   }
+
+  String _t(String key) => _lang.translate('inventory', key);
 
   @override
   Widget build(BuildContext context) {
@@ -89,13 +93,13 @@ class _InventoryPageState extends State<InventoryPage>
       ),
       child: Column(
         children: [
-          const Text("INVENTORY",
-              style: TextStyle(
+          Text(_t('title'),
+              style: const TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
                   letterSpacing: 2)),
-          Text("Atur perlengkapan bermainmu!",
+          Text(_t('subtitle'),
               style: TextStyle(
                   fontSize: 16,
                   color: Colors.blue[100],
@@ -121,7 +125,7 @@ class _InventoryPageState extends State<InventoryPage>
         labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
-        tabs: const [Tab(text: "KARAKTER"), Tab(text: "FRAME BORDER")],
+        tabs: [Tab(text: _t('tab_skin')), Tab(text: _t('tab_border'))],
       ),
     );
   }
@@ -295,7 +299,7 @@ class _InventoryPageState extends State<InventoryPage>
                     backgroundColor: isSelected ? Colors.green : Colors.blue,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15))),
-                child: Text(isSelected ? "DIPAKAI" : "GUNAKAN",
+                child: Text(isSelected ? _t('using') : _t('use'),
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.white)),
               ),
@@ -425,7 +429,7 @@ class _InventoryPageState extends State<InventoryPage>
                   padding: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10))),
-              child: Text(isSelected ? "DIPAKAI" : "GUNAKAN",
+              child: Text(isSelected ? _t('using') : _t('use'),
                   style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,

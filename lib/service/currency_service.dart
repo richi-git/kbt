@@ -6,11 +6,20 @@ class CurrencyService {
   CurrencyService._internal();
 
   final ValueNotifier<int> _coins = ValueNotifier<int>(1250);
+  final ValueNotifier<bool> _isPremium = ValueNotifier<bool>(false);
+
   ValueListenable<int> get coinsListenable => _coins;
+  ValueListenable<bool> get premiumListenable => _isPremium;
+
   int get coins => _coins.value;
+  bool get isPremium => _isPremium.value;
 
   void addCoins(int amount) {
     _coins.value += amount;
+  }
+
+  void setPremium(bool value) {
+    _isPremium.value = value;
   }
 
   bool spendCoins(int amount) {

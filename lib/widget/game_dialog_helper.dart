@@ -1,20 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:praktikum_1/service/leaderboard_service.dart';
+import 'package:praktikum_1/config/game_config.dart';
+import 'package:praktikum_1/service/language_service.dart';
 
 class GameDialogHelper {
-  static void showWinDialog(BuildContext context) {
+  static final LanguageService _lang = LanguageService();
+  static String _t(String key) => _lang.translate('dialog', key);
+
+  static void showWinDialog(BuildContext context, {int score = 0}) {
+    if (score > 0) {
+      LeaderboardService().saveScore(GameConfig.username, score);
+    }
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("LEVEL COMPLETE!",
+        title: Text(_t('win_title'),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 24,
                 color: Colors.green)),
-        content: const Text("Selamat! Level berikutnya telah terbuka.",
-            textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(_t('win_content'),
+                textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 16),
+            Text("${_t('win_score')}$score",
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent)),
+          ],
+        ),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           ElevatedButton(
@@ -26,8 +46,8 @@ class GameDialogHelper {
                 backgroundColor: Colors.blueAccent,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
-            child: const Text("BACK TO MAP",
-                style: TextStyle(
+            child: Text(_t('win_button'),
+                style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           )
         ],
@@ -41,11 +61,11 @@ class GameDialogHelper {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("GAME OVER!",
+        title: Text(_t('lose_title'),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
                 fontWeight: FontWeight.bold, fontSize: 24, color: Colors.red)),
-        content: Text("$reason\nCoba lagi ya!",
+        content: Text("$reason${_t('lose_content')}",
             textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
@@ -58,8 +78,8 @@ class GameDialogHelper {
                 backgroundColor: Colors.orange,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
-            child: const Text("KEMBALI KE MAP",
-                style: TextStyle(
+            child: Text(_t('lose_button'),
+                style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           )
         ],
@@ -114,15 +134,15 @@ class GameDialogHelper {
                         ),
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 300),
-                          child: const Column(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  "PERMAINAN DIJEDA",
-                                  style: TextStyle(
+                                  _t('pause_status'),
+                                  style: const TextStyle(
                                     fontSize: 26,
                                     fontWeight: FontWeight.w900,
                                     color: Colors.white,
@@ -135,10 +155,10 @@ class GameDialogHelper {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
-                                "Pilih tindakan selanjutnya",
-                                style: TextStyle(
+                                _t('pause_subtitle'),
+                                style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white70,
@@ -156,7 +176,7 @@ class GameDialogHelper {
                       alignment: WrapAlignment.center,
                       children: [
                         _buildPauseButton(
-                          "LANJUTKAN",
+                          _t('resume'),
                           Colors.green,
                           Colors.lightGreen,
                           () {
@@ -165,7 +185,7 @@ class GameDialogHelper {
                           },
                         ),
                         _buildPauseButton(
-                          "ULANGI",
+                          _t('restart'),
                           Colors.blue,
                           Colors.lightBlue,
                           () {
@@ -174,7 +194,7 @@ class GameDialogHelper {
                           },
                         ),
                         _buildPauseButton(
-                          "HOME",
+                          _t('home'),
                           Colors.orange,
                           Colors.orangeAccent,
                           () => Navigator.of(context)
@@ -201,9 +221,9 @@ class GameDialogHelper {
                           offset: Offset(0, 4)),
                     ],
                   ),
-                  child: const Text(
-                    "PAUSE",
-                    style: TextStyle(
+                  child: Text(
+                    _t('pause_title'),
+                    style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
                       color: Colors.yellow,

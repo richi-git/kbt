@@ -40,6 +40,7 @@ class _GameViewState extends State<GameView>
   // LOGIKA TARIK TAMBANG: Total 50 poin
   int userScore = 25;
   int aiScore = 25;
+  int currentSessionScore = 0;
   String currentCalculationResult = "";
 
   Timer? _timer;
@@ -336,6 +337,7 @@ class _GameViewState extends State<GameView>
         QCService.restockInventory(activeDeliveryRoute, gridNodes);
         setState(() {
           userScore += earned;
+          currentSessionScore += earned;
           aiScore -= earned;
           if (aiScore < 0) aiScore = 0;
           if (userScore >= 50) {
@@ -345,7 +347,7 @@ class _GameViewState extends State<GameView>
             if (GameConfig.latestUnlockedLevel < 4) {
               GameConfig.latestUnlockedLevel++;
             }
-            GameDialogHelper.showWinDialog(context);
+            GameDialogHelper.showWinDialog(context, score: currentSessionScore);
           }
         });
       }

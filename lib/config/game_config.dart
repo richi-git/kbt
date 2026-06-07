@@ -16,6 +16,9 @@ class GameConfig {
   static String selectedCharacter = "BUBU"; // Default awal
   static Color selectedBorderColor = Colors.blue; // Default warna border
   static String selectedBorderType = "flow"; // Default tipe animasi
+  static String username = "Player 1"; // Default username
+  static double volume = 1.0; // Default volume (0.0 to 1.0)
+  static String language = "id"; // Default language ('id' or 'en')
 
   // Rentang angka yang akan muncul (misal 1 sampai 9)
   static const int minNumber = 1;

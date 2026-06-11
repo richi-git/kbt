@@ -47,6 +47,88 @@ class MLBorderPainter extends CustomPainter {
       _paintCrystalEffect(canvas, size, mainPaint);
     } else if (type == "vortex") {
       _paintVortexEffect(canvas, size, mainPaint);
+    } else if (type == "lightning") {
+      _paintLightningEffect(canvas, size, mainPaint);
+    } else if (type == "cyber") {
+      _paintCyberEffect(canvas, size, mainPaint);
+    } else if (type == "rainbow") {
+      _paintRainbowEffect(canvas, size, mainPaint);
+    } else if (type == "phantom") {
+      _paintPhantomEffect(canvas, size, mainPaint);
+    }
+  }
+
+  void _paintLightningEffect(Canvas canvas, Size size, Paint paint) {
+    final rand = math.Random((progress * 100).toInt());
+    if (rand.nextDouble() > 0.8) {
+      paint.color = Colors.white;
+      paint.strokeWidth = 3 + rand.nextDouble() * 5;
+      paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      
+      final path = Path();
+      path.moveTo(rand.nextDouble() * size.width, 0);
+      for (int i = 1; i < 5; i++) {
+        path.lineTo(rand.nextDouble() * size.width, (size.height / 5) * i);
+      }
+      path.lineTo(rand.nextDouble() * size.width, size.height);
+      canvas.drawPath(path, paint);
+    }
+    
+    paint.shader = null;
+    paint.color = color;
+    paint.strokeWidth = 6;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+  }
+
+  void _paintCyberEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    paint.color = color;
+    paint.strokeWidth = 4;
+    canvas.drawRRect(rrect, paint);
+
+    final gridPaint = Paint()
+      ..color = color.withValues(alpha: 0.3)
+      ..strokeWidth = 1;
+
+    for (double i = 0; i < size.width; i += 20) {
+      canvas.drawLine(Offset(i, 0), Offset(i, size.height), gridPaint);
+    }
+    for (double i = 0; i < size.height; i += 20) {
+      canvas.drawLine(Offset(0, i), Offset(size.width, i), gridPaint);
+    }
+
+    final glitchY = (progress * size.height * 2) % size.height;
+    final glitchPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.8)
+      ..strokeWidth = 2;
+    canvas.drawLine(Offset(0, glitchY), Offset(size.width, glitchY), glitchPaint);
+  }
+
+  void _paintRainbowEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    paint.shader = SweepGradient(
+      colors: const [
+        Colors.red, Colors.orange, Colors.yellow, 
+        Colors.green, Colors.blue, Colors.indigo, 
+        Colors.purple, Colors.red
+      ],
+      transform: GradientRotation(progress * 2 * math.pi),
+    ).createShader(Offset.zero & size);
+    paint.strokeWidth = 10;
+    canvas.drawRRect(rrect, paint);
+  }
+
+  void _paintPhantomEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    for (int i = 0; i < 3; i++) {
+      final pProgress = (progress - (i * 0.1)) % 1.0;
+      final pPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 8 - (i * 2)
+        ..color = color.withValues(alpha: 0.6 / (i + 1))
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2.0 * i);
+      
+      canvas.drawRRect(rrect, pPaint);
     }
   }
 

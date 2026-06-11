@@ -82,7 +82,8 @@ class ItemService extends ChangeNotifier {
         isOwned: false,
         type: ItemType.skin,
         skill: "TREASURE HUNTER",
-        desc: "Mendapatkan bonus +50 koin tambahan setiap kali memenangkan level HARD.",
+        desc:
+            "Mendapatkan bonus +50 koin tambahan setiap kali memenangkan level HARD.",
         skillIcon: Icons.monetization_on_rounded,
       ),
       StoreItem(
@@ -106,7 +107,8 @@ class ItemService extends ChangeNotifier {
         isOwned: false,
         type: ItemType.skin,
         skill: "ROYAL SHIELD",
-        desc: "Memberikan 1x kesempatan salah jawab tanpa mengurangi poin per level.",
+        desc:
+            "Memberikan 1x kesempatan salah jawab tanpa mengurangi poin per level.",
         skillIcon: Icons.shield_rounded,
       ),
       StoreItem(
@@ -118,7 +120,8 @@ class ItemService extends ChangeNotifier {
         isOwned: false,
         type: ItemType.skin,
         skill: "TECH SCAN",
-        desc: "Mendeteksi jawaban yang benar lebih cepat dengan bantuan sensor.",
+        desc:
+            "Mendeteksi jawaban yang benar lebih cepat dengan bantuan sensor.",
         skillIcon: Icons.biotech_rounded,
       ),
       StoreItem(
@@ -243,17 +246,56 @@ class ItemService extends ChangeNotifier {
         type: ItemType.border,
         borderType: "phantom",
       ),
+      StoreItem(
+        name: "Magma Pulse",
+        color: Colors.deepOrange,
+        price: 750,
+        isOwned: false,
+        type: ItemType.border,
+        borderType: "magma",
+      ),
+      StoreItem(
+        name: "Digital Matrix",
+        color: Colors.greenAccent,
+        price: 800,
+        isOwned: false,
+        type: ItemType.border,
+        borderType: "matrix",
+      ),
+      StoreItem(
+        name: "Frost Bite",
+        color: Colors.lightBlueAccent,
+        price: 650,
+        isOwned: false,
+        type: ItemType.border,
+        borderType: "frost",
+      ),
+      StoreItem(
+        name: "Gravity Void",
+        color: Colors.deepPurpleAccent,
+        price: 900,
+        isOwned: false,
+        type: ItemType.border,
+        borderType: "void",
+      ),
     ]);
   }
 
   final List<StoreItem> _items = [];
 
   List<StoreItem> get allItems => _items;
-  List<StoreItem> get ownedItems => _items.where((item) => item.isOwned).toList();
-  List<StoreItem> get skins => _items.where((item) => item.type == ItemType.skin).toList();
-  List<StoreItem> get borders => _items.where((item) => item.type == ItemType.border).toList();
-  List<StoreItem> get ownedSkins => _items.where((item) => item.type == ItemType.skin && item.isOwned).toList();
-  List<StoreItem> get ownedBorders => _items.where((item) => item.type == ItemType.border && item.isOwned).toList();
+  List<StoreItem> get ownedItems =>
+      _items.where((item) => item.isOwned).toList();
+  List<StoreItem> get skins =>
+      _items.where((item) => item.type == ItemType.skin).toList();
+  List<StoreItem> get borders =>
+      _items.where((item) => item.type == ItemType.border).toList();
+  List<StoreItem> get ownedSkins => _items
+      .where((item) => item.type == ItemType.skin && item.isOwned)
+      .toList();
+  List<StoreItem> get ownedBorders => _items
+      .where((item) => item.type == ItemType.border && item.isOwned)
+      .toList();
 
   void purchaseItem(String name) {
     final index = _items.indexWhere((item) => item.name == name);

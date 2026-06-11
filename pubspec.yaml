@@ -75,3 +75,6 @@ flutter:
   assets:
     - assets/
     - assets/audio/
+    - assets/chara_astronautbubu.png
+    - assets/chara_cyborgbubu.png
+    - assets/chara_queengirl.png

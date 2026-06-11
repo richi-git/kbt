@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:praktikum_1/config/game_config.dart'; // Import config
 import 'package:praktikum_1/service/item_service.dart';
+import 'package:praktikum_1/service/language_service.dart';
 import 'package:praktikum_1/widget/math_background.dart';
 
 class CharacterPage extends StatefulWidget {
@@ -27,55 +28,55 @@ class _CharacterPageState extends State<CharacterPage> {
         children: [
           const MathBackground(),
           SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 30),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ListenableBuilder(
-                        listenable: ItemService(),
-                        builder: (context, child) {
-                          final characters = ItemService().ownedSkins;
-                          return OrientationBuilder(
-                            builder: (context, orientation) {
-                              if (orientation == Orientation.landscape) {
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: characters.map((char) {
-                                    return Expanded(
-                                      child: _buildCharacterCard(char),
-                                    );
-                                  }).toList(),
-                                );
-                              } else {
-                                return SingleChildScrollView(
-                                  padding: const EdgeInsets.only(bottom: 100),
-                                  child: Column(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 30),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: ListenableBuilder(
+                          listenable: ItemService(),
+                          builder: (context, child) {
+                            final characters = ItemService().ownedSkins;
+                            return OrientationBuilder(
+                              builder: (context, orientation) {
+                                if (orientation == Orientation.landscape) {
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: characters.map((char) {
-                                      return SizedBox(
-                                        height: 450,
+                                      return Expanded(
                                         child: _buildCharacterCard(char),
                                       );
                                     }).toList(),
-                                  ),
-                                );
-                              }
-                            },
-                          );
-                        },
+                                  );
+                                } else {
+                                  return SingleChildScrollView(
+                                    padding: const EdgeInsets.only(bottom: 100),
+                                    child: Column(
+                                      children: characters.map((char) {
+                                        return SizedBox(
+                                          height: 450,
+                                          child: _buildCharacterCard(char),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 60),
-                ],
+                    const SizedBox(height: 60),
+                  ],
+                ),
               ),
             ),
-          ),
           ),
         ],
       ),
@@ -88,7 +89,10 @@ class _CharacterPageState extends State<CharacterPage> {
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [const Color(0xFF0D47A1).withOpacity(0.95), const Color(0xFF1976D2).withOpacity(0.95)],
+          colors: [
+            const Color(0xFF0D47A1).withOpacity(0.95),
+            const Color(0xFF1976D2).withOpacity(0.95)
+          ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -97,7 +101,8 @@ class _CharacterPageState extends State<CharacterPage> {
           bottomRight: Radius.circular(40),
         ),
         boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5)),
+          BoxShadow(
+              color: Colors.black26, blurRadius: 10, offset: Offset(0, 5)),
         ],
         border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
       ),
@@ -107,7 +112,8 @@ class _CharacterPageState extends State<CharacterPage> {
           Align(
             alignment: Alignment.centerLeft,
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -120,7 +126,12 @@ class _CharacterPageState extends State<CharacterPage> {
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     letterSpacing: 3,
-                    shadows: [Shadow(color: Colors.black45, blurRadius: 5, offset: Offset(2, 2))]),
+                    shadows: [
+                      Shadow(
+                          color: Colors.black45,
+                          blurRadius: 5,
+                          offset: Offset(2, 2))
+                    ]),
               ),
               const SizedBox(height: 4),
               Text(
@@ -173,6 +184,7 @@ class _CharacterCardState extends State<_CharacterCard> {
   Widget build(BuildContext context) {
     final char = widget.char;
     final isSelected = widget.isSelected;
+    final lang = LanguageService();
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
@@ -182,7 +194,9 @@ class _CharacterCardState extends State<_CharacterCard> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          transform: isHovered ? (Matrix4.diagonal3Values(1.02, 1.02, 1.0)) : Matrix4.identity(),
+          transform: isHovered
+              ? (Matrix4.diagonal3Values(1.02, 1.02, 1.0))
+              : Matrix4.identity(),
           margin: EdgeInsets.symmetric(
             horizontal: 8,
             vertical: isSelected ? 0 : 20,
@@ -229,16 +243,20 @@ class _CharacterCardState extends State<_CharacterCard> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(0), // Removed padding to maximize space
+                            padding: const EdgeInsets.all(
+                                0), // Removed padding to maximize space
                             child: char.imagePath != null
                                 ? Image.asset(
                                     char.imagePath!,
-                                    height: 280, // Significantly increased from 180
+                                    height:
+                                        280, // Significantly increased from 180
                                     fit: BoxFit.contain,
                                     filterQuality: FilterQuality.high,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        Icon(char.icon,
-                                            size: 80, color: Colors.white),
+                                    errorBuilder:
+                                        (context, error, stackTrace) => Icon(
+                                            char.icon,
+                                            size: 80,
+                                            color: Colors.white),
                                   )
                                 : Icon(char.icon,
                                     size: 80, color: Colors.white),
@@ -255,7 +273,8 @@ class _CharacterCardState extends State<_CharacterCard> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.military_tech_rounded, color: Colors.yellowAccent, size: 20),
+                        const Icon(Icons.military_tech_rounded,
+                            color: Colors.yellowAccent, size: 20),
                         const SizedBox(width: 8),
                         Text(char.name,
                             textAlign: TextAlign.center,
@@ -288,7 +307,9 @@ class _CharacterCardState extends State<_CharacterCard> {
                               ),
                             const SizedBox(height: 6),
                             if (char.skill != null)
-                              Text(_lang.translate('skills', '${char.skill}_name'),
+                              Text(
+                                  lang.translate(
+                                      'skills', '${char.skill}_name'),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -296,10 +317,14 @@ class _CharacterCardState extends State<_CharacterCard> {
                                       color: char.color)),
                             const SizedBox(height: 8),
                             if (char.desc != null)
-                              Text(_lang.translate('skills', '${char.skill}_desc'),
+                              Text(
+                                  lang.translate(
+                                      'skills', '${char.skill}_desc'),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
-                                      fontSize: 12, color: Colors.black87, height: 1.2)),
+                                      fontSize: 12,
+                                      color: Colors.black87,
+                                      height: 1.2)),
                           ],
                         ),
                       ),

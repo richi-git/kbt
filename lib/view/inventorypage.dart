@@ -267,7 +267,7 @@ class _InventoryPageState extends State<InventoryPage>
                     if (char.skillIcon != null)
                       Icon(char.skillIcon, color: char.color, size: 24),
                     if (char.skill != null)
-                      Text(char.skill!,
+                      Text(_lang.translate('skills', '${char.skill}_name'),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -275,7 +275,7 @@ class _InventoryPageState extends State<InventoryPage>
                               color: char.color)),
                     const SizedBox(height: 4),
                     if (char.desc != null)
-                      Text(char.desc!,
+                      Text(_lang.translate('skills', '${char.skill}_desc'),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                               fontSize: 11, color: Colors.black87)),

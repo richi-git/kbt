@@ -288,20 +288,18 @@ class _CharacterCardState extends State<_CharacterCard> {
                               ),
                             const SizedBox(height: 6),
                             if (char.skill != null)
-                              Text(char.skill!,
+                              Text(_lang.translate('skills', '${char.skill}_name'),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 12,
+                                      fontSize: 14,
                                       color: char.color)),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             if (char.desc != null)
-                              Text(char.desc!,
+                              Text(_lang.translate('skills', '${char.skill}_desc'),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.black87,
-                                      height: 1.2)),
+                                      fontSize: 12, color: Colors.black87, height: 1.2)),
                           ],
                         ),
                       ),

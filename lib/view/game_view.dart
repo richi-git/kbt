@@ -9,6 +9,7 @@ import 'package:praktikum_1/widget/score_bar_widget.dart';
 import 'package:praktikum_1/widget/target_column_widget.dart';
 import 'package:praktikum_1/service/qc_service.dart';
 import 'package:praktikum_1/service/audio_service.dart';
+import 'package:praktikum_1/service/currency_service.dart';
 import 'package:praktikum_1/widget/game_dialog_helper.dart';
 import 'package:praktikum_1/widget/floating_score_widget.dart';
 import 'package:praktikum_1/widget/animated_border_painter.dart';
@@ -49,11 +50,24 @@ class _GameViewState extends State<GameView>
   List<int> hintedRoute = [];
   late int remainingSeconds;
 
+  bool isTimeStopped = false;
+  bool zeroGravityUsed = false;
+  bool hasFulfilledHardTarget = false;
+
   late AnimationController _borderAnimationController;
 
   @override
   void initState() {
     super.initState();
+    // Skill NINJA BOY: Awal permainan lebih menguntungkan
+    if (GameConfig.selectedCharacter == "NINJA BOY") {
+      userScore = 26;
+      aiScore = 24;
+    } else {
+      userScore = 25;
+      aiScore = 25;
+    }
+
     _initRandomInventory();
     _generateDemandForecast();
     _initTimerConfig();
@@ -86,9 +100,11 @@ class _GameViewState extends State<GameView>
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (isTimeStopped) return;
       if (remainingSeconds > 0) {
         setState(() {
           remainingSeconds--;
+          _checkAstronautSkill();
         });
       } else {
         _stopAllTimers();
@@ -101,11 +117,13 @@ class _GameViewState extends State<GameView>
     // Skill BOY memperlambat AI
     int aiInterval = GameConfig.selectedCharacter == "BOY" ? 5 : 3;
     _aiTimer = Timer.periodic(Duration(seconds: aiInterval), (timer) {
+      if (isTimeStopped) return;
       if (mounted) {
         setState(() {
           if (userScore > 0) {
             userScore -= 1;
             aiScore += 1;
+            _checkAstronautSkill();
           }
           if (userScore <= 0) {
             userScore = 0;
@@ -119,6 +137,30 @@ class _GameViewState extends State<GameView>
     });
   }
 
+  void _checkAstronautSkill() {
+    if (GameConfig.selectedCharacter == "ASTRONAUT BUBU" && !zeroGravityUsed) {
+      if (remainingSeconds < 30 || userScore < 10) {
+        setState(() {
+          zeroGravityUsed = true;
+          userScore = 50;
+          aiScore = 0;
+          currentSessionScore = 9999;
+          _stopAllTimers();
+          
+          // Reward logic for insta-win
+          int baseReward = currentSessionScore * 5;
+          CurrencyService().addCoins(baseReward);
+
+          if (GameConfig.latestUnlockedLevel < 4) {
+            GameConfig.latestUnlockedLevel++;
+          }
+          _showFloatingAnimation("GALAXY STRIKE!", Colors.indigo);
+          GameDialogHelper.showWinDialog(context, score: currentSessionScore);
+        });
+      }
+    }
+  }
+
   void _resetIdleTimer() {
     _idleTimer?.cancel();
     if (hintedRoute.isNotEmpty) {
@@ -126,9 +168,10 @@ class _GameViewState extends State<GameView>
         hintedRoute.clear();
       });
     }
-    // Skill BUBU memberikan hint rute
-    if (GameConfig.selectedCharacter == "BUBU") {
-      _idleTimer = Timer(const Duration(seconds: 5), () {
+    // Skill BUBU memberikan hint rute, CYBORG BUBU lebih cepat
+    if (GameConfig.selectedCharacter == "BUBU" || GameConfig.selectedCharacter == "CYBORG BUBU") {
+      int duration = GameConfig.selectedCharacter == "CYBORG BUBU" ? 2 : 5;
+      _idleTimer = Timer(Duration(seconds: duration), () {
         if (mounted) {
           List<int> route =
               QCService.findHintRoute(gridNodes, _getAllActiveOrders());
@@ -336,6 +379,7 @@ class _GameViewState extends State<GameView>
         AudioService.playSuccessSFX();
         QCService.restockInventory(activeDeliveryRoute, gridNodes);
         setState(() {
+          if (hIdx != -1) hasFulfilledHardTarget = true;
           userScore += earned;
           currentSessionScore += earned;
           aiScore -= earned;
@@ -344,6 +388,17 @@ class _GameViewState extends State<GameView>
             userScore = 50;
             aiScore = 0;
             _stopAllTimers();
+
+            // Logika Hadiah Koin
+            int baseReward = currentSessionScore * 5;
+            if (GameConfig.selectedCharacter == "QUEEN GIRL") {
+              baseReward *= 2;
+            }
+            if (GameConfig.selectedCharacter == "PIRATE BUBU" && hasFulfilledHardTarget) {
+              baseReward += 50;
+            }
+            CurrencyService().addCoins(baseReward);
+
             if (GameConfig.latestUnlockedLevel < 4) {
               GameConfig.latestUnlockedLevel++;
             }
@@ -394,10 +449,13 @@ class _GameViewState extends State<GameView>
                             },
                             onRestart: () {
                               setState(() {
-                                userScore = 25;
-                                aiScore = 25;
+                                userScore = GameConfig.selectedCharacter == "NINJA BOY" ? 26 : 25;
+                                aiScore = GameConfig.selectedCharacter == "NINJA BOY" ? 24 : 25;
                                 currentCalculationResult = "";
                                 activeDeliveryRoute.clear();
+                                isTimeStopped = false;
+                                zeroGravityUsed = false;
+                                hasFulfilledHardTarget = false;
                                 _initRandomInventory();
                                 _generateDemandForecast();
                                 _initTimerConfig();

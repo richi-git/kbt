@@ -184,6 +184,48 @@ class LanguageService {
         'restart': 'RESTART',
         'home': 'HOME',
       }
+    },
+    'skills': {
+      'id': {
+        'MATH HELPER_name': 'MATH HELPER',
+        'MATH HELPER_desc': 'Memberi petunjuk jalur jika kamu bingung selama 5 detik.',
+        'QUICK SOLVER_name': 'QUICK SOLVER',
+        'QUICK SOLVER_desc': 'Menambah jeda waktu berpikir AI sebanyak 1 detik.',
+        'POINT BOOSTER_name': 'POINT BOOSTER',
+        'POINT BOOSTER_desc': 'Bonus +1 poin ekstra untuk setiap target HARD.',
+        'TREASURE HUNTER_name': 'TREASURE HUNTER',
+        'TREASURE HUNTER_desc': 'Mendapatkan bonus +50 koin tambahan setiap kali memenangkan level HARD.',
+        'SHADOW STRIKE_name': 'SHADOW STRIKE',
+        'SHADOW STRIKE_desc': 'Mengurangi target angka AI sebanyak 1 poin di awal permainan.',
+        'ROYAL SHIELD_name': 'ROYAL SHIELD',
+        'ROYAL SHIELD_desc': 'Memberikan 1x kesempatan salah jawab tanpa mengurangi poin per level.',
+        'TECH SCAN_name': 'TECH SCAN',
+        'TECH SCAN_desc': 'Mendeteksi jawaban yang benar lebih cepat dengan bantuan sensor.',
+        'ROYAL WEALTH_name': 'ROYAL WEALTH',
+        'ROYAL WEALTH_desc': 'Mendapatkan koin 2x lipat lebih banyak di setiap level.',
+        'GALAXY STRIKE_name': 'GALAXY STRIKE',
+        'GALAXY STRIKE_desc': 'Kemenangan instan dengan skor 9999 pts saat kondisi kritis.',
+      },
+      'en': {
+        'MATH HELPER_name': 'MATH HELPER',
+        'MATH HELPER_desc': 'Gives path hints if you are confused for 5 seconds.',
+        'QUICK SOLVER_name': 'QUICK SOLVER',
+        'QUICK SOLVER_desc': 'Adds 1 second thinking time delay for the AI.',
+        'POINT BOOSTER_name': 'POINT BOOSTER',
+        'POINT BOOSTER_desc': 'Bonus +1 extra point for every HARD target.',
+        'TREASURE HUNTER_name': 'TREASURE HUNTER',
+        'TREASURE HUNTER_desc': 'Get +50 bonus coins every time you win a HARD level.',
+        'SHADOW STRIKE_name': 'SHADOW STRIKE',
+        'SHADOW STRIKE_desc': 'Reduces AI target number by 1 point at the start.',
+        'ROYAL SHIELD_name': 'ROYAL SHIELD',
+        'ROYAL SHIELD_desc': 'Gives 1x chance of wrong answer without point deduction.',
+        'TECH SCAN_name': 'TECH SCAN',
+        'TECH SCAN_desc': 'Detects the correct answer faster with sensor help.',
+        'ROYAL WEALTH_name': 'ROYAL WEALTH',
+        'ROYAL WEALTH_desc': 'Get 2x more coins in every level.',
+        'GALAXY STRIKE_name': 'GALAXY STRIKE',
+        'GALAXY STRIKE_desc': 'Instant victory with 9999 pts when in critical condition.',
+      }
     }
   };
 

@@ -55,6 +55,109 @@ class MLBorderPainter extends CustomPainter {
       _paintRainbowEffect(canvas, size, mainPaint);
     } else if (type == "phantom") {
       _paintPhantomEffect(canvas, size, mainPaint);
+    } else if (type == "magma") {
+      _paintMagmaEffect(canvas, size, mainPaint);
+    } else if (type == "matrix") {
+      _paintMatrixEffect(canvas, size, mainPaint);
+    } else if (type == "frost") {
+      _paintFrostEffect(canvas, size, mainPaint);
+    } else if (type == "void") {
+      _paintVoidEffect(canvas, size, mainPaint);
+    }
+  }
+
+  void _paintMagmaEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    final pulse = (math.sin(progress * 2 * math.pi) + 1) / 2;
+    
+    paint.shader = RadialGradient(
+      colors: [Colors.red, Colors.orange, Colors.yellow, Colors.red],
+      stops: [0.0, 0.4 + (pulse * 0.2), 0.7, 1.0],
+      center: Alignment.center,
+      radius: 1.5,
+    ).createShader(Offset.zero & size);
+    paint.strokeWidth = 10;
+    canvas.drawRRect(rrect, paint);
+
+    final crackPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.7)
+      ..strokeWidth = 2;
+    final rand = math.Random(42);
+    for (int i = 0; i < 15; i++) {
+      double x = rand.nextDouble() * size.width;
+      double y = rand.nextDouble() * size.height;
+      canvas.drawLine(Offset(x, y), Offset(x + 10, y + 10), crackPaint);
+    }
+  }
+
+  void _paintMatrixEffect(Canvas canvas, Size size, Paint paint) {
+    paint.color = Colors.black;
+    paint.strokeWidth = 6;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+
+    final textPaint = Paint()..color = Colors.greenAccent.withValues(alpha: 0.8);
+    final rand = math.Random((progress * 20).toInt());
+    for (int i = 0; i < 20; i++) {
+      double x = (i * size.width / 20);
+      double y = (progress * size.height + (i * 30)) % size.height;
+      canvas.drawRect(Rect.fromLTWH(x, y, 4, 10), textPaint);
+      if (rand.nextDouble() > 0.7) {
+        canvas.drawRect(Rect.fromLTWH(x, y - 15, 4, 10), textPaint);
+      }
+    }
+    
+    paint.shader = null;
+    paint.color = Colors.greenAccent;
+    paint.strokeWidth = 2;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+  }
+
+  void _paintFrostEffect(Canvas canvas, Size size, Paint paint) {
+    paint.color = Colors.white.withValues(alpha: 0.3);
+    paint.strokeWidth = 12;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+
+    final frostPaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 3
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+
+    for (int i = 0; i < 4; i++) {
+      double angle = i * math.pi / 2;
+      canvas.save();
+      canvas.translate(
+        i == 0 || i == 3 ? 10 : size.width - 10,
+        i == 0 || i == 1 ? 10 : size.height - 10
+      );
+      for (int j = 0; j < 6; j++) {
+        double len = 15 + 10 * math.sin(progress * 5 + j);
+        canvas.rotate(math.pi / 3);
+        canvas.drawLine(Offset.zero, Offset(len, 0), frostPaint);
+      }
+      canvas.restore();
+    }
+  }
+
+  void _paintVoidEffect(Canvas canvas, Size size, Paint paint) {
+    paint.shader = const RadialGradient(
+      colors: [Colors.black, Colors.deepPurple, Colors.transparent],
+      stops: [0.0, 0.7, 1.0],
+    ).createShader(Offset.zero & size);
+    paint.strokeWidth = 15;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+
+    final particlePaint = Paint()..color = Colors.white;
+    for (int i = 0; i < 20; i++) {
+      double t = (progress + i / 20) % 1.0;
+      double radius = (1 - t) * 50;
+      double angle = i * 0.5 + progress * 2 * math.pi;
+      double px = size.width / 2 + math.cos(angle) * radius;
+      double py = size.height / 2 + math.sin(angle) * radius;
+      
+      // Only draw if near edge
+      if (px < 15 || px > size.width - 15 || py < 15 || py > size.height - 15) {
+        canvas.drawCircle(Offset(px, py), 2 * (1 - t), particlePaint);
+      }
     }
   }
 

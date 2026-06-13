@@ -1,0 +1,378 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+
+class MLBorderPainter extends CustomPainter {
+  final Color color;
+  final double progress;
+  final String type;
+  final bool isHovered;
+  final double borderRadius;
+
+  MLBorderPainter({
+    required this.color,
+    required this.progress,
+    required this.type,
+    required this.isHovered,
+    this.borderRadius = 20.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
+    
+    // Background Glow Base (Aura Dasar)
+    final glowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = isHovered ? 12 : 8
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
+      ..color = color.withValues(alpha: 0.6);
+    canvas.drawRRect(rrect, glowPaint);
+
+    final mainPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = isHovered ? 6 : 4;
+
+    if (type == "flow") {
+      _paintFlowEffect(canvas, size, mainPaint);
+    } else if (type == "shimmer") {
+      _paintShimmerEffect(canvas, size, mainPaint);
+    } else if (type == "scan") {
+      _paintScanEffect(canvas, size, mainPaint);
+    } else if (type == "pulse") {
+      _paintPulseEffect(canvas, size, mainPaint);
+    } else if (type == "fire") {
+      _paintFireEffect(canvas, size, mainPaint);
+    } else if (type == "crystal") {
+      _paintCrystalEffect(canvas, size, mainPaint);
+    } else if (type == "vortex") {
+      _paintVortexEffect(canvas, size, mainPaint);
+    } else if (type == "lightning") {
+      _paintLightningEffect(canvas, size, mainPaint);
+    } else if (type == "cyber") {
+      _paintCyberEffect(canvas, size, mainPaint);
+    } else if (type == "rainbow") {
+      _paintRainbowEffect(canvas, size, mainPaint);
+    } else if (type == "phantom") {
+      _paintPhantomEffect(canvas, size, mainPaint);
+    } else if (type == "magma") {
+      _paintMagmaEffect(canvas, size, mainPaint);
+    } else if (type == "matrix") {
+      _paintMatrixEffect(canvas, size, mainPaint);
+    } else if (type == "frost") {
+      _paintFrostEffect(canvas, size, mainPaint);
+    } else if (type == "void") {
+      _paintVoidEffect(canvas, size, mainPaint);
+    }
+  }
+
+  void _paintMagmaEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    final pulse = (math.sin(progress * 2 * math.pi) + 1) / 2;
+    
+    paint.shader = RadialGradient(
+      colors: [Colors.red, Colors.orange, Colors.yellow, Colors.red],
+      stops: [0.0, 0.4 + (pulse * 0.2), 0.7, 1.0],
+      center: Alignment.center,
+      radius: 1.5,
+    ).createShader(Offset.zero & size);
+    paint.strokeWidth = 10;
+    canvas.drawRRect(rrect, paint);
+
+    final crackPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.7)
+      ..strokeWidth = 2;
+    final rand = math.Random(42);
+    for (int i = 0; i < 15; i++) {
+      double x = rand.nextDouble() * size.width;
+      double y = rand.nextDouble() * size.height;
+      canvas.drawLine(Offset(x, y), Offset(x + 10, y + 10), crackPaint);
+    }
+  }
+
+  void _paintMatrixEffect(Canvas canvas, Size size, Paint paint) {
+    paint.color = Colors.black;
+    paint.strokeWidth = 6;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+
+    final textPaint = Paint()..color = Colors.greenAccent.withValues(alpha: 0.8);
+    final rand = math.Random((progress * 20).toInt());
+    for (int i = 0; i < 20; i++) {
+      double x = (i * size.width / 20);
+      double y = (progress * size.height + (i * 30)) % size.height;
+      canvas.drawRect(Rect.fromLTWH(x, y, 4, 10), textPaint);
+      if (rand.nextDouble() > 0.7) {
+        canvas.drawRect(Rect.fromLTWH(x, y - 15, 4, 10), textPaint);
+      }
+    }
+    
+    paint.shader = null;
+    paint.color = Colors.greenAccent;
+    paint.strokeWidth = 2;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+  }
+
+  void _paintFrostEffect(Canvas canvas, Size size, Paint paint) {
+    paint.color = Colors.white.withValues(alpha: 0.3);
+    paint.strokeWidth = 12;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+
+    final frostPaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 3
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+
+    for (int i = 0; i < 4; i++) {
+      double angle = i * math.pi / 2;
+      canvas.save();
+      canvas.translate(
+        i == 0 || i == 3 ? 10 : size.width - 10,
+        i == 0 || i == 1 ? 10 : size.height - 10
+      );
+      for (int j = 0; j < 6; j++) {
+        double len = 15 + 10 * math.sin(progress * 5 + j);
+        canvas.rotate(math.pi / 3);
+        canvas.drawLine(Offset.zero, Offset(len, 0), frostPaint);
+      }
+      canvas.restore();
+    }
+  }
+
+  void _paintVoidEffect(Canvas canvas, Size size, Paint paint) {
+    paint.shader = const RadialGradient(
+      colors: [Colors.black, Colors.deepPurple, Colors.transparent],
+      stops: [0.0, 0.7, 1.0],
+    ).createShader(Offset.zero & size);
+    paint.strokeWidth = 15;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+
+    final particlePaint = Paint()..color = Colors.white;
+    for (int i = 0; i < 20; i++) {
+      double t = (progress + i / 20) % 1.0;
+      double radius = (1 - t) * 50;
+      double angle = i * 0.5 + progress * 2 * math.pi;
+      double px = size.width / 2 + math.cos(angle) * radius;
+      double py = size.height / 2 + math.sin(angle) * radius;
+      
+      // Only draw if near edge
+      if (px < 15 || px > size.width - 15 || py < 15 || py > size.height - 15) {
+        canvas.drawCircle(Offset(px, py), 2 * (1 - t), particlePaint);
+      }
+    }
+  }
+
+  void _paintLightningEffect(Canvas canvas, Size size, Paint paint) {
+    final rand = math.Random((progress * 100).toInt());
+    if (rand.nextDouble() > 0.8) {
+      paint.color = Colors.white;
+      paint.strokeWidth = 3 + rand.nextDouble() * 5;
+      paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      
+      final path = Path();
+      path.moveTo(rand.nextDouble() * size.width, 0);
+      for (int i = 1; i < 5; i++) {
+        path.lineTo(rand.nextDouble() * size.width, (size.height / 5) * i);
+      }
+      path.lineTo(rand.nextDouble() * size.width, size.height);
+      canvas.drawPath(path, paint);
+    }
+    
+    paint.shader = null;
+    paint.color = color;
+    paint.strokeWidth = 6;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+  }
+
+  void _paintCyberEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    paint.color = color;
+    paint.strokeWidth = 4;
+    canvas.drawRRect(rrect, paint);
+
+    final gridPaint = Paint()
+      ..color = color.withValues(alpha: 0.3)
+      ..strokeWidth = 1;
+
+    for (double i = 0; i < size.width; i += 20) {
+      canvas.drawLine(Offset(i, 0), Offset(i, size.height), gridPaint);
+    }
+    for (double i = 0; i < size.height; i += 20) {
+      canvas.drawLine(Offset(0, i), Offset(size.width, i), gridPaint);
+    }
+
+    final glitchY = (progress * size.height * 2) % size.height;
+    final glitchPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.8)
+      ..strokeWidth = 2;
+    canvas.drawLine(Offset(0, glitchY), Offset(size.width, glitchY), glitchPaint);
+  }
+
+  void _paintRainbowEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    paint.shader = SweepGradient(
+      colors: const [
+        Colors.red, Colors.orange, Colors.yellow, 
+        Colors.green, Colors.blue, Colors.indigo, 
+        Colors.purple, Colors.red
+      ],
+      transform: GradientRotation(progress * 2 * math.pi),
+    ).createShader(Offset.zero & size);
+    paint.strokeWidth = 10;
+    canvas.drawRRect(rrect, paint);
+  }
+
+  void _paintPhantomEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    for (int i = 0; i < 3; i++) {
+      final pProgress = (progress - (i * 0.1)) % 1.0;
+      final pPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 8 - (i * 2)
+        ..color = color.withValues(alpha: 0.6 / (i + 1))
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2.0 * i);
+      
+      canvas.drawRRect(rrect, pPaint);
+    }
+  }
+
+  void _paintFlowEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    
+    paint.shader = SweepGradient(
+      colors: [Colors.transparent, color, Colors.white, color, Colors.transparent],
+      stops: const [0.0, 0.4, 0.5, 0.6, 1.0],
+      transform: GradientRotation(progress * 2 * math.pi),
+    ).createShader(Offset.zero & size);
+    
+    paint.strokeWidth = 8;
+    canvas.drawRRect(rrect, paint);
+  }
+
+  void _paintShimmerEffect(Canvas canvas, Size size, Paint paint) {
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    
+    final shimmerShader = LinearGradient(
+      colors: [Colors.transparent, Colors.white, color, Colors.white, Colors.transparent],
+      stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      transform: GradientRotation(progress * 4 * math.pi),
+    ).createShader(Offset.zero & size);
+    
+    paint.shader = shimmerShader;
+    paint.strokeWidth = 7;
+    canvas.drawRRect(rrect, paint);
+    
+    final cornerPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+    
+    double orbit = 12 * math.sin(progress * 2 * math.pi);
+    canvas.drawCircle(Offset(orbit, orbit), 6, cornerPaint);
+    canvas.drawCircle(Offset(size.width - orbit, orbit), 6, cornerPaint);
+    canvas.drawCircle(Offset(orbit, size.height - orbit), 6, cornerPaint);
+    canvas.drawCircle(Offset(size.width - orbit, size.height - orbit), 6, cornerPaint);
+  }
+
+  void _paintScanEffect(Canvas canvas, Size size, Paint paint) {
+    final scanY = size.height * progress;
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    
+    paint.color = color.withValues(alpha: 0.4);
+    paint.strokeWidth = 4;
+    canvas.drawRRect(rrect, paint);
+
+    final scanPaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+    canvas.drawLine(Offset(5, scanY), Offset(size.width - 5, scanY), scanPaint);
+    
+    final glowShader = LinearGradient(
+      colors: [Colors.transparent, color, Colors.white, color, Colors.transparent],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    ).createShader(Rect.fromLTWH(0, scanY - 30, size.width, 60));
+    
+    final glowPaint = Paint()..shader = glowShader;
+    canvas.drawRect(Rect.fromLTWH(0, scanY - 30, size.width, 60), glowPaint);
+  }
+
+  void _paintPulseEffect(Canvas canvas, Size size, Paint paint) {
+    final pulseValue = (math.sin(progress * 2 * math.pi) + 1) / 2;
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius));
+    
+    final outerPulse = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10 * pulseValue
+      ..color = color.withValues(alpha: 0.5 * (1 - pulseValue))
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawRRect(rrect, outerPulse);
+
+    paint.color = Color.lerp(color, Colors.white, 0.5 * pulseValue)!;
+    paint.strokeWidth = 6 + 4 * pulseValue;
+    canvas.drawRRect(rrect, paint);
+  }
+
+  void _paintFireEffect(Canvas canvas, Size size, Paint paint) {
+    final fireShader = LinearGradient(
+      colors: [Colors.transparent, color, Colors.white, Colors.orangeAccent, Colors.transparent],
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      stops: [0.0, progress * 0.8, progress, (progress + 0.2).clamp(0, 1), 1.0],
+    ).createShader(Offset.zero & size);
+    
+    paint.strokeWidth = 8;
+    paint.shader = fireShader;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+
+    for (int i = 0; i < 8; i++) {
+      final pPaint = Paint()
+        ..color = i % 2 == 0 ? Colors.white : color
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+      double px = (math.sin(progress * 15 + i * 50) + 1) / 2 * size.width;
+      double py = ((1 - progress) * size.height + (i * 10)) % size.height;
+      canvas.drawCircle(Offset(px, py), 4 * (1 - py/size.height), pPaint);
+    }
+  }
+
+  void _paintCrystalEffect(Canvas canvas, Size size, Paint paint) {
+    final crystalShader = LinearGradient(
+      colors: [color, Colors.white, color, Colors.white, color],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      stops: [0.0, (progress - 0.1).clamp(0, 1), progress, (progress + 0.1).clamp(0, 1), 1.0],
+    ).createShader(Offset.zero & size);
+    
+    paint.strokeWidth = 6;
+    paint.shader = crystalShader;
+    canvas.drawRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(borderRadius)), paint);
+
+    final flashPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.9 * (math.sin(progress * 4 * math.pi).abs()))
+      ..strokeWidth = 4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    canvas.drawLine(const Offset(10, 10), Offset(size.width - 10, size.height - 10), flashPaint);
+    canvas.drawLine(Offset(size.width - 10, 10), Offset(10, size.height - 10), flashPaint);
+  }
+
+  void _paintVortexEffect(Canvas canvas, Size size, Paint paint) {
+    canvas.save();
+    canvas.translate(size.width/2, size.height/2);
+    canvas.rotate(progress * 2 * math.pi);
+    
+    final vortexShader = RadialGradient(
+      colors: [Colors.white, color, Colors.transparent, color, Colors.white],
+      stops: const [0.0, 0.2, 0.5, 0.8, 1.0],
+    ).createShader(Rect.fromCircle(center: Offset.zero, radius: size.width));
+    
+    paint.shader = vortexShader;
+    paint.strokeWidth = 10;
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset.zero, width: size.width + 10, height: size.height + 10), Radius.circular(borderRadius)), paint);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(MLBorderPainter oldDelegate) => true;
+}
